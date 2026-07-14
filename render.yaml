@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: lennebraha-backend
+    name: quantro-backend
     runtime: docker
     plan: free
     envVars:
