@@ -79,6 +79,9 @@
       <input type="text" id="gorev-baslik" class="form-control" placeholder="Görev başlığı..." style="margin-bottom:0.8rem;width:100%;">
       <textarea id="gorev-aciklama" class="form-control" placeholder="Görev açıklaması..." rows="3" style="margin-bottom:0.8rem;width:100%;"></textarea>
       <div style="display:flex;gap:0.8rem;margin-bottom:0.8rem;flex-wrap:wrap;">
+        <select id="gorev-ekip-select" class="form-control" style="flex:1;min-width:140px;">
+          <option value="">Ekip seç (opsiyonel)</option>
+        </select>
         <select id="gorev-oncelik" class="form-control" style="flex:1;min-width:120px;">
           <option value="dusuk">Düşük</option>
           <option value="orta" selected>Orta</option>

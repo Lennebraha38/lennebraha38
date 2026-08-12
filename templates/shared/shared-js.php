@@ -8,6 +8,15 @@ const SUPABASE_URL = 'https://shvdsyclykgflyzgpdsi.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNodmRzeWNseWtnZmx5emdwZHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NzU2NjMsImV4cCI6MjA5NjI1MTY2M30.aO9yuXS8uH5YFwYumWIWsjBikQ0SHQJ0n3mGMl7GGXU';
 let supabase;
 
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+const SEHIR_MAP = { online:'Uzaktan', adana:'Adana', adiyaman:'Adıyaman', afyonkarahisar:'Afyonkarahisar', agri:'Ağrı', aksaray:'Aksaray', amasya:'Amasya', ankara:'Ankara', antalya:'Antalya', ardahan:'Ardahan', artvin:'Artvin', aydin:'Aydın', balikesir:'Balıkesir', bartin:'Bartın', batman:'Batman', bayburt:'Bayburt', bilecik:'Bilecik', bingol:'Bingöl', bitlis:'Bitlis', bolu:'Bolu', burdur:'Burdur', bursa:'Bursa', canakkale:'Çanakkale', cankiri:'Çankırı', corum:'Çorum', denizli:'Denizli', diyarbakir:'Diyarbakır', duzce:'Düzce', edirne:'Edirne', elazig:'Elazığ', erzincan:'Erzincan', erzurum:'Erzurum', eskisehir:'Eskişehir', gaziantep:'Gaziantep', giresun:'Giresun', gumushane:'Gümüşhane', hakkari:'Hakkari', hatay:'Hatay', igdir:'Iğdır', isparta:'Isparta', istanbul:'İstanbul', izmir:'İzmir', kahramanmaras:'Kahramanmaraş', karabuk:'Karabük', karaman:'Karaman', kars:'Kars', kastamonu:'Kastamonu', kayseri:'Kayseri', kilis:'Kilis', kirikkale:'Kırıkkale', kirklareli:'Kırklareli', kirsehir:'Kırşehir', kocaeli:'Kocaeli', konya:'Konya', kutahya:'Kütahya', malatya:'Malatya', manisa:'Manisa', mardin:'Mardin', mersin:'Mersin', mugla:'Muğla', mus:'Muş', nevsehir:'Nevşehir', nigde:'Niğde', ordu:'Ordu', osmaniye:'Osmaniye', rize:'Rize', sakarya:'Sakarya', samsun:'Samsun', sanliurfa:'Şanlıurfa', siirt:'Siirt', sinop:'Sinop', sirnak:'Şırnak', sivas:'Sivas', tekirdag:'Tekirdağ', tokat:'Tokat', trabzon:'Trabzon', tunceli:'Tunceli', usak:'Uşak', van:'Van', yalova:'Yalova', yozgat:'Yozgat', zonguldak:'Zonguldak' };
+const sehirLabel = (s) => SEHIR_MAP[s] || s || '—';
+
 function initSupabase() {
   if (typeof window.supabase === 'undefined') { console.error('Supabase SDK yüklenemedi!'); return false; }
   supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -86,8 +95,9 @@ function createIlanCardElement(ilan, currentUserEmail) {
   const tipEmoji = ilan.emoji || { 'takim': '🤝', 'proje': '🚀', 'mentor': '🎓' }[ilan.ilan_tipi] || '📌';
   const card = document.createElement('div');
   card.className = 'ilan-card';
+  const sehir = sehirLabel(ilan.sehir);
   card.dataset.baslik = ilan.baslik || ''; card.dataset.aciklama = ilan.aciklama || '';
-  card.dataset.sehir = ilan.sehir || ''; card.dataset.kisi = ilan.kisi || '';
+  card.dataset.sehir = sehir; card.dataset.kisi = ilan.kisi || '';
   card.dataset.tip = ilan.ilan_tipi || ''; card.dataset.tipEmoji = tipEmoji;
   card.dataset.etiketler = ilan.etiketler || ''; card.dataset.badge = ilan.durum || 'Açık';
   card.dataset.badgeClass = badgeClass; card.dataset.owner = isOwner ? 'true' : 'false';
@@ -96,13 +106,13 @@ function createIlanCardElement(ilan, currentUserEmail) {
   card.setAttribute('onmousemove', 'handle3DCard(event, this)');
   card.setAttribute('onmouseleave', 'reset3DCard(this)');
   card.setAttribute('onclick', 'openIlanDetail(this)');
-  const tags = (ilan.etiketler || '').split(',').filter(Boolean).map(t => '<span class="ilan-tag">'+t.trim()+'</span>').join('');
+  const tags = (ilan.etiketler || '').split(',').filter(Boolean).map(t => '<span class="ilan-tag">'+escapeHtml(t.trim())+'</span>').join('');
   card.innerHTML = '<div class="ilan-badge '+badgeClass+'">'+(ilan.durum||'Açık')+'</div>'+
     '<div class="ilan-tip-emoji">'+tipEmoji+'</div>'+
-    '<h3 class="ilan-card-title">'+(ilan.baslik||'Başlıksız')+'</h3>'+
-    '<p class="ilan-card-desc">'+(ilan.aciklama||'').substring(0,150)+((ilan.aciklama||'').length>150?'...':'')+'</p>'+
+    '<h3 class="ilan-card-title">'+escapeHtml(ilan.baslik||'Başlıksız')+'</h3>'+
+    '<p class="ilan-card-desc">'+escapeHtml((ilan.aciklama||'').substring(0,150))+((ilan.aciklama||'').length>150?'...':'')+'</p>'+
     '<div class="ilan-card-tags">'+tags+'</div>'+
-    '<div class="ilan-card-meta"><span>📍 '+(ilan.sehir||'—')+'</span><span>👥 '+(ilan.kisi||'1 Kişi')+'</span></div>'+
+    '<div class="ilan-card-meta"><span>📍 '+escapeHtml(sehir)+'</span><span>👥 '+escapeHtml(ilan.kisi||'1 Kişi')+'</span></div>'+
     (isOwner ? '<button class="btn btn-ghost btn-sm" style="color:#f87171;border-color:rgba(239,68,68,0.2);margin-top:0.3rem" onclick="event.stopPropagation();deleteIlanCard(this)" title="İlanı sil"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 14.142A2 2 0 0 1 16.138 22H7.862a2 2 0 0 1-1.995-1.858L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>Sil</button>' : '');
   return card;
 }
