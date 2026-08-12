@@ -1,5 +1,5 @@
 // ============================================
-// Lennebraha38 — Gorev & Ekip Yonetim Sistemi
+// Quantro — Gorev & Ekip Yonetim Sistemi
 // Trello tarzi Kanban Board + Ekip Olusturma
 // Supabase Realtime entegrasyonlu
 // ============================================
