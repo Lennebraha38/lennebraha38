@@ -80,13 +80,16 @@ function renderEkipList() {
       ...uyeler.slice(0, 2).map(u => `<span class="ekip-uye-chip" title="${escapeHtml(u.kullanici_email)}">${escapeHtml(u.kullanici_email.substring(0, 2).toUpperCase())}</span>`)
     ];
     if (uyeler.length > 2) uyeCipleri.push(`<span class="ekip-uye-chip">+${uyeler.length - 2}</span>`);
+    const renk = e.renk || '#7c5cff';
+    const liderIyi = liderRozeti === ' 👑';
     return `
-    <div class="ekip-card" onclick="openEkipDetail(${e.id})">
+    <div class="ekip-card" onclick="openEkipDetail(${e.id})" style="border-left:4px solid ${renk};">
       <div class="ekip-card-header">
         <span class="ekip-emoji">${ekipEmoji(e.kategori)}</span>
         <span class="ekip-badge">${escapeHtml(e.durum || 'Açık')}</span>
       </div>
       <h4>${escapeHtml(e.isim)}${liderRozeti}</h4>
+      ${e.slogan ? `<p style="color:${renk};font-weight:700;font-size:0.8rem;">${escapeHtml(e.slogan)}</p>` : ''}
       <p>${escapeHtml((e.aciklama || '').substring(0, 80))}</p>
       <div class="ekip-meta">
         <span>${1 + uyeler.length}/${e.max_uye || 10} üye</span>
@@ -96,6 +99,7 @@ function renderEkipList() {
       <div style="margin-top:0.8rem;display:flex;gap:0.5rem;">
         ${isEkipLider(e) ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openDavetModal(${e.id})" style="flex:1">✉️ Davet Et</button>` : '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEkipDetail(' + e.id + ')" style="flex:1">Detay</button>'}
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();filterByEkip(${e.id})" style="flex:1">Görevler</button>
+        ${isEkipLider(e) ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEkipDuzenle(${e.id})" title="Ekip Düzenle">✏️</button>` : ''}
       </div>
     </div>
   `;
@@ -123,13 +127,25 @@ function openEkipDetail(ekipId) {
       <span>${escapeHtml(e.olusturan_email || '')}</span>
     </div>
     <div class="gd-aciklama">${escapeHtml(e.aciklama) || '<em>Açıklama yok</em>'}</div>
+    ${e.slogan ? `<div style="margin-top:0.4rem;font-size:0.85rem;font-weight:700;color:${e.renk || '#7c5cff'};">✨ ${escapeHtml(e.slogan)}</div>` : ''}
     <div style="margin:1rem 0 0.5rem;font-size:0.8rem;font-weight:700;color:var(--text-dim);">ÜYELER</div>
     <div class="ekip-detay-uyeler">
-      <div class="ekip-detay-uye"><span class="ekip-avatar">👑</span><span>${escapeHtml(e.olusturan_email)}</span><span class="ekip-rol">Lider</span></div>
+      <div class="ekip-detay-uye"><span class="ekip-avatar">👑</span><span style="flex:1">${escapeHtml(e.olusturan_email)}</span><span class="ekip-rol">Lider</span>
+        ${lider && uyeler.length > 0 ? `<button class="btn btn-ghost btn-sm" onclick="lideriDevret(${e.id})" title="Liderliği devret">🔄 Devret</button>` : ''}
+      </div>
       ${uyeler.map(u => `
-        <div class="ekip-detay-uye"><span class="ekip-avatar">${escapeHtml(u.kullanici_email.substring(0, 2).toUpperCase())}</span><span>${escapeHtml(u.kullanici_email)}</span><span class="ekip-rol">Üye</span></div>
+        <div class="ekip-detay-uye"><span class="ekip-avatar">${escapeHtml(u.kullanici_email.substring(0, 2).toUpperCase())}</span><span style="flex:1">${escapeHtml(u.kullanici_email)}</span><span class="ekip-rol">Üye</span>
+          ${lider ? `<button class="btn btn-ghost btn-sm" onclick="uyeCikar(${e.id},'${escapeHtml(u.kullanici_email)}')" title="Üyeyi çıkar">✖</button>` : ''}
+        </div>
       `).join('')}
       ${uyeler.length === 0 ? '<div style="color:var(--text-dim);font-size:0.85rem;">Henüz üye yok. Üyeleri davet etmeye başla!</div>' : ''}
+    </div>
+    <div style="margin:1rem 0 0.5rem;font-size:0.8rem;font-weight:700;color:var(--text-dim);">DUYURULAR</div>
+    <div id="ekip-duyurular-listesi" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.6rem;"><div style="color:var(--text-dim);font-size:0.85rem;">Yükleniyor...</div></div>
+    <div id="duyuru-form" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;${lider ? '' : 'display:none;'}">
+      <input type="text" id="duyuru-baslik" class="form-control" placeholder="Duyuru başlığı">
+      <input type="text" id="duyuru-icerik" class="form-control" placeholder="Duyuru içeriği">
+      <button class="btn btn-ghost btn-sm" onclick="duyuruEkle(${e.id})">📢 Duyuru Paylaş</button>
     </div>
     ${lider ? '<div style="margin:1rem 0 0.5rem;font-size:0.8rem;font-weight:700;color:var(--text-dim);" id="davetler-baslik">BEKLEYEN DAVETLER</div><div id="ekip-davetler-listesi" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"><div style="color:var(--text-dim);font-size:0.85rem;">Yükleniyor...</div></div>' : ''}
     <div class="gd-actions">
@@ -140,6 +156,92 @@ function openEkipDetail(ekipId) {
   `;
   modal.classList.add('open');
   if (lider) renderEkipDavetleri(e.id);
+  renderEkipDuyurulari(e.id);
+}
+
+async function renderEkipDuyurulari(ekipId) {
+  const liste = document.getElementById('ekip-duyurular-listesi');
+  if (!liste) return;
+  const { data, error } = await supabase.from('ekip_duyurular')
+    .select('*')
+    .eq('ekip_id', ekipId)
+    .order('olusturulma_tarihi', { ascending: false })
+    .limit(20);
+  if (error) { liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Duyurular yüklenemedi.</div>'; return; }
+  if (!data || !data.length) { liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Henüz duyuru yok.</div>'; return; }
+  liste.innerHTML = data.map(d => `
+    <div class="ekip-detay-uye" style="align-items:flex-start;">
+      <span class="ekip-avatar">📢</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:0.85rem;">${escapeHtml(d.baslik)}</div>
+        ${d.icerik ? `<div style="font-size:0.8rem;color:var(--text-dim);word-break:break-word;">${escapeHtml(d.icerik)}</div>` : ''}
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:0.2rem;">${escapeHtml(d.yazar_email || '')} • ${new Date(d.olusturulma_tarihi).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+      </div>
+      ${isEkipLider(allEkipler.find(x => x.id === ekipId)) ? `<button class="btn btn-ghost btn-sm" onclick="duyuruSil(${d.id},${ekipId})" title="Duyuruyu sil">✖</button>` : ''}
+    </div>
+  `).join('');
+}
+
+async function duyuruEkle(ekipId) {
+  const baslik = document.getElementById('duyuru-baslik')?.value?.trim();
+  const icerik = document.getElementById('duyuru-icerik')?.value?.trim();
+  if (!baslik) { showToast('Duyuru başlığı yaz!'); return; }
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) { showToast('Önce giriş yap!'); return; }
+  const { error } = await supabase.from('ekip_duyurular').insert({
+    ekip_id: ekipId, baslik, icerik: icerik || '', yazar_email: session.user.email
+  });
+  if (error) { console.error(error.message); showToast('Duyuru yayınlanamadı: ' + error.message); return; }
+  showToast('📢 Duyuru paylaşıldı!');
+  const b = document.getElementById('duyuru-baslik'); if (b) b.value = '';
+  const i = document.getElementById('duyuru-icerik'); if (i) i.value = '';
+  renderEkipDuyurulari(ekipId);
+}
+
+async function duyuruSil(duyuruId, ekipId) {
+  if (!confirm('Bu duyuruyu silmek istediğine emin misin?')) return;
+  const { error } = await supabase.from('ekip_duyurular').delete().eq('id', duyuruId);
+  if (error) { console.error(error.message); showToast('Silinemedi: ' + error.message); return; }
+  showToast('Duyuru silindi.');
+  renderEkipDuyurulari(ekipId);
+}
+
+async function uyeCikar(ekipId, kullaniciEmail) {
+  const e = allEkipler.find(x => x.id === ekipId);
+  if (!e || !isEkipLider(e)) return;
+  if (!confirm(`${kullaniciEmail} adlı üyeyi ekipten çıkarmak istediğine emin misin?`)) return;
+  const { error } = await supabase.from('ekip_uyeleri').delete()
+    .eq('ekip_id', ekipId).eq('kullanici_email', kullaniciEmail);
+  if (error) { console.error(error.message); showToast('Çıkarılamadı: ' + error.message); return; }
+  showToast('Üye ekipten çıkarıldı.');
+  await loadEkipler();
+  openEkipDetail(ekipId);
+}
+
+async function lideriDevret(ekipId) {
+  const e = allEkipler.find(x => x.id === ekipId);
+  if (!e || !isEkipLider(e)) return;
+  const uyeler = allUyeler[ekipId] || [];
+  if (!uyeler.length) { showToast('Devredebileceğin üye yok!'); return; }
+  const hedef = uyeler[0];
+  if (!confirm(`Liderliği ${hedef.kullanici_email} adlı üyeye devretmek istediğine emin misin?`)) return;
+  const session = (await supabase.auth.getSession()).data.session;
+  const { error: upErr } = await supabase.from('ekipler').update({
+    olusturan_email: hedef.kullanici_email,
+    olusturan_id: hedef.kullanici_id
+  }).eq('id', ekipId);
+  if (upErr) { console.error(upErr.message); showToast('Devredilemedi: ' + upErr.message); return; }
+  const { error: delErr } = await supabase.from('ekip_uyeleri').delete()
+    .eq('ekip_id', ekipId).eq('kullanici_email', hedef.kullanici_email);
+  if (delErr) { console.error(delErr.message); showToast('Devredilemedi: ' + delErr.message); return; }
+  const { error: insErr } = await supabase.from('ekip_uyeleri').insert({
+    ekip_id: ekipId, kullanici_email: session.user.email,
+    kullanici_id: session.user.id, rol: 'üye'
+  });
+  if (insErr) { console.error(insErr.message); showToast('Devredilemedi: ' + insErr.message); return; }
+  showToast('👑 Liderlik devredildi!');
+  await loadEkipler();
+  openEkipDetail(ekipId);
 }
 
 function openEkipDuzenle(ekipId) {
@@ -172,6 +274,18 @@ function openEkipDuzenle(ekipId) {
         </select>
       </div>
       <div>
+        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Ekip Rengi</label>
+        <input type="color" id="duzenle-renk" value="${e.renk || '#7c5cff'}" style="width:100%;height:2.5rem;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-surface);padding:0.2rem;cursor:pointer;">
+      </div>
+      <div>
+        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Slogan</label>
+        <input type="text" id="duzenle-slogan" class="form-control" value="${escapeHtml(e.slogan || '')}" placeholder="Ekibin sloganı (opsiyonel)" style="width:100%;">
+      </div>
+      <div>
+        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Kontenjan (max üye)</label>
+        <input type="number" id="duzenle-maxuye" class="form-control" min="1" max="50" value="${e.max_uye || 10}" style="width:100%;">
+      </div>
+      <div>
         <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Açıklama</label>
         <textarea id="duzenle-aciklama" class="form-control" rows="3" style="width:100%;resize:vertical;">${escapeHtml(e.aciklama || '')}</textarea>
       </div>
@@ -189,9 +303,13 @@ async function kaydetEkipDuzenle(ekipId) {
   const kategori = document.getElementById('duzenle-kategori')?.value || 'genel';
   const durum = document.getElementById('duzenle-durum')?.value || 'Açık';
   const aciklama = document.getElementById('duzenle-aciklama')?.value?.trim();
+  const renk = document.getElementById('duzenle-renk')?.value || '#7c5cff';
+  const slogan = document.getElementById('duzenle-slogan')?.value?.trim() || '';
+  const maxUye = parseInt(document.getElementById('duzenle-maxuye')?.value) || 10;
   if (!isim) { showToast('Ekip adı boş olamaz!'); return; }
+  if (maxUye < 1 || maxUye > 50) { showToast('Kontenjan 1-50 arası olmalı!'); return; }
 
-  const { error } = await supabase.from('ekipler').update({ isim, kategori, durum, aciklama }).eq('id', ekipId);
+  const { error } = await supabase.from('ekipler').update({ isim, kategori, durum, aciklama, renk, slogan, max_uye: maxUye }).eq('id', ekipId);
   if (error) { console.error(error.message); showToast('Güncellenemedi: ' + error.message); return; }
 
   showToast('✅ Ekip güncellendi!');
