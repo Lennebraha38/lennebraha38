@@ -183,7 +183,18 @@ function openDavetModal(ekipId) {
   modal.classList.add('open');
 }
 
+// ===== OTOMATIK EPOSTA (EmailJS) =====
+// EmailJS (emailjs.com) ucretsiz: 200 e-posta/ay. Kurulum:
+// 1) emailjs.com -> hesap ac -> Email Services -> Gmail bagla -> Service ID
+// 2) Email Templates -> yeni sablon: To Email: {{to_email}}, Subject: "[Quantro] {{takim_adi}} takimina davet edildin 🚀",
+//    Icerik: "Merhaba {{to_name}},\n\n\"{{takim_adi}}\" takimina davet edildin!\n\nEkibe katilmak icin tikla: {{davet_linki}}\n\n— {{davet_eden}}"
+// 3) Account -> API Keys -> Public Key
+const EMAILJS_SERVICE_ID = '';
+const EMAILJS_TEMPLATE_ID = '';
+const EMAILJS_PUBLIC_KEY = '';
+
 let davetMailtoUrl = null;
+let sonGonderimEmail = null;
 
 function kopyalaDavetLinki() {
   const link = document.getElementById('davet-link')?.value;
@@ -253,16 +264,39 @@ async function sendDavet() {
     `Merhaba,\n\n"${ekip.isim}" takımına davet edildin!\n\nEkibe katılmak için aşağıdaki linke tıkla:\n${link}\n\nBu link sadece senin e-postan için geçerlidir.\n\n— ${session.user.email}`
   );
   davetMailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+  sonGonderimEmail = email;
 
-  // Sonuc ekranini goster: link gorunur + kopyalanabilir
+  // Otomatik e-posta (EmailJS) — basarisiz olursa link/kopyala ekranina dus
+  let otomatikGitti = false;
+  try {
+    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY && window.emailjs) {
+      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: email,
+        to_name: email.split('@')[0],
+        takim_adi: ekip.isim,
+        davet_eden: session.user.email,
+        davet_linki: link
+      });
+      otomatikGitti = true;
+    }
+  } catch (e) { console.error('Otomatik e-posta gönderilemedi:', e); }
+
+  // Sonuc ekranini goster
   const form = document.getElementById('davet-form');
   const sonuc = document.getElementById('davet-sonuc');
   const linkEl = document.getElementById('davet-link');
+  const durumEl = document.getElementById('davet-durum-msg');
   if (form) form.style.display = 'none';
   if (sonuc) sonuc.style.display = 'block';
   if (linkEl) linkEl.value = link;
+  if (durumEl) {
+    durumEl.textContent = otomatikGitti
+      ? `📧 Davet e-postası ${email} adresine gönderildi!`
+      : (EMAILJS_SERVICE_ID ? '⚠️ E-posta gönderilemedi — linki kopyalayıp elle gönder.' : 'Davet hazır — linki kopyalayıp gönder (otomatik e-posta için EmailJS kurulumu gerekli).');
+  }
 
-  showToast('Davet oluşturuldu — linki üyene gönder!');
+  showToast(otomatikGitti ? '📧 Davet e-postası gönderildi!' : 'Davet oluşturuldu — linki üyene gönder!');
 }
 
 // ===== DAVET KABUL AKISI =====

@@ -122,6 +122,7 @@
       <div id="davet-sonuc" style="display:none;text-align:center;">
         <div style="font-size:2rem;margin-bottom:0.5rem;">✅</div>
         <h4 style="font-weight:800;margin-bottom:0.4rem;">Davet oluşturuldu!</h4>
+        <p style="font-size:0.85rem;font-weight:600;color:var(--primary);margin-bottom:0.6rem;" id="davet-durum-msg"></p>
         <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.8rem;">Bu linki üyene gönder — sadece davet ettiğin e-posta ile çalışır:</p>
         <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;">
           <input type="text" id="davet-link" readonly style="flex:1;padding:0.6rem 0.8rem;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-surface);color:var(--text);font-size:0.75rem;">
