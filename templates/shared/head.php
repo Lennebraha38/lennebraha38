@@ -11,6 +11,9 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  try { if (localStorage.getItem('quantro-theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) {}
+  </script>
 
   <style>
     /* ===== DESIGN TOKENS — Quantro Brand System ($10K Checklist) ===== */
@@ -111,27 +114,42 @@
       --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
       --shadow-lg: 0 16px 48px -12px rgba(0,0,0,0.12), 0 0 30px -8px var(--brand-glow);
       --shadow-glow: 0 0 20px var(--brand-glow);
-
-      /* Light-specific overrides */
-      .bg-scene { opacity: 0.25; }
-      .noise-overlay { opacity: 0.12; }
-      .nav-content { background: rgba(255,255,255,0.92) !important; border-bottom-color: rgba(21,34,56,0.06) !important; }
-      #main-nav { background: rgba(255,255,255,0.92); border-bottom-color: rgba(21,34,56,0.06); }
-      .section-header h2 { color: #152238; }
-      .kanban-col { background: #F4F6F9; border-color: rgba(21,34,56,0.06); }
-      .gorev-card { background: #FFFFFF; border-color: rgba(21,34,56,0.08); }
-      .gorev-card:hover { border-color: rgba(37,99,235,0.25); }
-      .ekip-card { background: #FFFFFF; border-color: rgba(21,34,56,0.08); }
-      .ekip-card:hover { border-color: rgba(37,99,235,0.2); }
-      .form-control { background: #FFFFFF; color: #152238; border-color: rgba(21,34,56,0.12); }
-      .btn-primary { box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
-      footer { background: #FFFFFF; border-top-color: rgba(21,34,56,0.06); }
-      footer .footer-bottom { border-top-color: rgba(21,34,56,0.06); }
-      #gorev-detay-modal { background: rgba(0,0,0,0.3) !important; }
-      .mobile-menu { background: rgba(255,255,255,0.98); }
-      .mobile-menu a { color: #152238; }
-      .auth-panel-left { background: linear-gradient(135deg, #152238 0%, #1a3a5c 100%); }
     }
+
+    /* Light-specific overrides — ayri kural bloklari (eski tarayicilarda CSS nesting desteklenmez) */
+    html[data-theme="light"] .bg-scene { opacity: 0.25; }
+    html[data-theme="light"] .noise-overlay { opacity: 0.12; }
+    html[data-theme="light"] .nav-content { background: rgba(255,255,255,0.92) !important; border-bottom-color: rgba(21,34,56,0.06) !important; }
+    html[data-theme="light"] #main-nav { background: rgba(255,255,255,0.92); border-bottom-color: rgba(21,34,56,0.06); }
+    html[data-theme="light"] nav.scrolled { background: rgba(255,255,255,0.92); }
+    html[data-theme="light"] .section-header h2 { color: #152238; }
+    html[data-theme="light"] .kanban-col { background: #F4F6F9; border-color: rgba(21,34,56,0.06); }
+    html[data-theme="light"] .gorev-card { background: #FFFFFF; border-color: rgba(21,34,56,0.08); }
+    html[data-theme="light"] .gorev-card:hover { border-color: rgba(37,99,235,0.25); }
+    html[data-theme="light"] .ekip-card { background: #FFFFFF; border-color: rgba(21,34,56,0.08); }
+    html[data-theme="light"] .ekip-card:hover { border-color: rgba(37,99,235,0.2); }
+    html[data-theme="light"] .form-control { background: #FFFFFF; color: #152238; border-color: rgba(21,34,56,0.12); }
+    html[data-theme="light"] select.form-control { background-color: #FFFFFF; color: #152238 !important; }
+    html[data-theme="light"] select.form-control option { background-color: #FFFFFF; color: #152238; }
+    html[data-theme="light"] .profil-filter-select option { background-color: #FFFFFF; color: #152238; }
+    html[data-theme="light"] .btn-primary { box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+    html[data-theme="light"] footer { background: #FFFFFF; border-top-color: rgba(21,34,56,0.06); }
+    html[data-theme="light"] footer .footer-bottom { border-top-color: rgba(21,34,56,0.06); }
+    html[data-theme="light"] #gorev-detay-modal { background: rgba(0,0,0,0.3) !important; }
+    html[data-theme="light"] .mobile-menu { background: rgba(255,255,255,0.98); }
+    html[data-theme="light"] .mobile-menu a { color: #152238; }
+    html[data-theme="light"] .auth-panel-left { background: linear-gradient(135deg, #152238 0%, #1a3a5c 100%); }
+    /* Hero basliklari: beyaz degrade -> koyu (light modda gorunur olsun) */
+    html[data-theme="light"] h1 { background: linear-gradient(160deg, #152238 30%, #5A6F85 100%); }
+    html[data-theme="light"] .h1-l1, html[data-theme="light"] .h1-l2 { background: linear-gradient(135deg, #152238 30%, #5A6F85 100%); }
+    /* Yarismalar kategori kartlari light modda */
+    html[data-theme="light"] .km-card { background: #FFFFFF; border-color: rgba(21,34,56,0.1); }
+    html[data-theme="light"] .km-card:hover { background: #F0F3F8; }
+    html[data-theme="light"] .km-card-name { color: #152238; }
+    html[data-theme="light"] .km-card-desc { color: #5A6F85; }
+    /* Cursor/particle katmanlari light modda */
+    html[data-theme="light"] #v-cursor { mix-blend-mode: normal; }
+    html[data-theme="light"] #v-bg-canvas { opacity: 0.3; }
 
     /* ===== RESET ===== */
     *, *::before, *::after {
