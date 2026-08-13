@@ -134,11 +134,69 @@ function openEkipDetail(ekipId) {
     ${lider ? '<div style="margin:1rem 0 0.5rem;font-size:0.8rem;font-weight:700;color:var(--text-dim);" id="davetler-baslik">BEKLEYEN DAVETLER</div><div id="ekip-davetler-listesi" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"><div style="color:var(--text-dim);font-size:0.85rem;">Yükleniyor...</div></div>' : ''}
     <div class="gd-actions">
       ${lider ? `<button class="btn btn-primary" style="flex:1" onclick="closeModal('ekip-detay-modal');openDavetModal(${e.id})">✉️ Üye Davet Et</button>` : ''}
+      ${lider ? `<button class="btn btn-ghost" style="flex:1" onclick="openEkipDuzenle(${e.id})">✏️ Düzenle</button>` : ''}
       <button class="btn btn-ghost" style="flex:1" onclick="filterByEkip(${e.id});closeModal('ekip-detay-modal')">Görevleri Gör</button>
     </div>
   `;
   modal.classList.add('open');
   if (lider) renderEkipDavetleri(e.id);
+}
+
+function openEkipDuzenle(ekipId) {
+  const e = allEkipler.find(x => x.id === ekipId);
+  if (!e || !isEkipLider(e)) return;
+  const modal = document.getElementById('ekip-detay-modal');
+  const content = document.getElementById('ekip-detay-content');
+  if (!modal || !content) return;
+
+  const kategoriOptions = Object.keys(EKIP_EMOJILER).map(k =>
+    `<option value="${k}" ${e.kategori === k ? 'selected' : ''}>${ekipEmoji(k)} ${k.charAt(0).toUpperCase() + k.slice(1)}</option>`
+  ).join('');
+
+  content.innerHTML = `
+    <div class="gd-header"><h3>✏️ Ekip Düzenle</h3></div>
+    <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
+      <div>
+        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Ekip Adı</label>
+        <input type="text" id="duzenle-isim" class="form-control" value="${escapeHtml(e.isim)}" style="width:100%;">
+      </div>
+      <div>
+        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Kategori</label>
+        <select id="duzenle-kategori" class="form-control" style="width:100%;">${kategoriOptions}</select>
+      </div>
+      <div>
+        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Durum</label>
+        <select id="duzenle-durum" class="form-control" style="width:100%;">
+          <option value="Açık" ${(e.durum || 'Açık') === 'Açık' ? 'selected' : ''}>Açık</option>
+          <option value="Kapalı" ${(e.durum || 'Açık') === 'Kapalı' ? 'selected' : ''}>Kapalı</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Açıklama</label>
+        <textarea id="duzenle-aciklama" class="form-control" rows="3" style="width:100%;resize:vertical;">${escapeHtml(e.aciklama || '')}</textarea>
+      </div>
+    </div>
+    <div class="gd-actions" style="margin-top:1.2rem;">
+      <button class="btn btn-primary" style="flex:1" onclick="kaydetEkipDuzenle(${e.id})">💾 Kaydet</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="openEkipDetail(${e.id})">İptal</button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+async function kaydetEkipDuzenle(ekipId) {
+  const isim = document.getElementById('duzenle-isim')?.value?.trim();
+  const kategori = document.getElementById('duzenle-kategori')?.value || 'genel';
+  const durum = document.getElementById('duzenle-durum')?.value || 'Açık';
+  const aciklama = document.getElementById('duzenle-aciklama')?.value?.trim();
+  if (!isim) { showToast('Ekip adı boş olamaz!'); return; }
+
+  const { error } = await supabase.from('ekipler').update({ isim, kategori, durum, aciklama }).eq('id', ekipId);
+  if (error) { console.error(error.message); showToast('Güncellenemedi: ' + error.message); return; }
+
+  showToast('✅ Ekip güncellendi!');
+  await loadEkipler();
+  openEkipDetail(ekipId);
 }
 
 async function renderEkipDavetleri(ekipId) {
