@@ -383,11 +383,16 @@ function overrideAuthFunctions() {
 // ===== TEMA YONETIMI =====
 let currentTheme = localStorage.getItem('quantro-theme') || 'dark';
 function applyTheme(theme) {
+  // Gecis animasyonlarini kapat (renkler ~1 sn "erimesin")
+  document.documentElement.classList.add('theme-switching');
   document.documentElement.setAttribute('data-theme', theme);
   const logos = document.querySelectorAll('.theme-logo');
   logos.forEach(img => { img.src = theme === 'light' ? 'logo.png' : 'logo-beyaz.png'; });
   localStorage.setItem('quantro-theme', theme);
   currentTheme = theme;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.documentElement.classList.remove('theme-switching');
+  }));
 }
 function toggleTheme() {
   const next = currentTheme === 'dark' ? 'light' : 'dark';

@@ -176,6 +176,9 @@
       overflow-x: hidden;
     }
 
+    /* Tema gecisinde renk erimelerini onle */
+    .theme-switching, .theme-switching * { transition: none !important; animation: none !important; }
+
     /* ===== 3D ANIMATED BACKGROUND ===== */
     .bg-scene {
       position: fixed;
