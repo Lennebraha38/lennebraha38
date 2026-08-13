@@ -100,7 +100,7 @@
     <div class="gd-card" id="gorev-detay-content"></div>
   </div>
 
-  <div id="ekip-detay-modal" onclick="if(event.target===this)closeModal('ekip-detay-modal')">
+  <div id="ekip-detay-modal" style="position:fixed;inset:0;z-index:5000;background:rgba(5,5,8,0.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;" onclick="if(event.target===this)closeModal('ekip-detay-modal')">
     <div class="gd-card" id="ekip-detay-content"></div>
   </div>
 

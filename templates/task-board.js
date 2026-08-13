@@ -148,7 +148,7 @@ function openEkipDetail(ekipId) {
       <button class="btn btn-ghost btn-sm" onclick="duyuruEkle(${e.id})">📢 Duyuru Paylaş</button>
     </div>
     ${lider ? '<div style="margin:1rem 0 0.5rem;font-size:0.8rem;font-weight:700;color:var(--text-dim);" id="davetler-baslik">BEKLEYEN DAVETLER</div><div id="ekip-davetler-listesi" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"><div style="color:var(--text-dim);font-size:0.85rem;">Yükleniyor...</div></div>' : ''}
-    <div class="gd-actions">
+    <div class="gd-actions" style="padding-top:1rem;border-top:1px solid var(--border);">
       ${lider ? `<button class="btn btn-primary" style="flex:1" onclick="closeModal('ekip-detay-modal');openDavetModal(${e.id})">✉️ Üye Davet Et</button>` : ''}
       ${lider ? `<button class="btn btn-ghost" style="flex:1" onclick="openEkipDuzenle(${e.id})">✏️ Düzenle</button>` : ''}
       <button class="btn btn-ghost" style="flex:1" onclick="filterByEkip(${e.id});closeModal('ekip-detay-modal')">Görevleri Gör</button>
@@ -256,44 +256,54 @@ function openEkipDuzenle(ekipId) {
   ).join('');
 
   content.innerHTML = `
-    <div class="gd-header"><h3>✏️ Ekip Düzenle</h3></div>
-    <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:1rem;">
-      <div>
-        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Ekip Adı</label>
-        <input type="text" id="duzenle-isim" class="form-control" value="${escapeHtml(e.isim)}" style="width:100%;">
-      </div>
-      <div>
-        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Kategori</label>
-        <select id="duzenle-kategori" class="form-control" style="width:100%;">${kategoriOptions}</select>
-      </div>
-      <div>
-        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Durum</label>
-        <select id="duzenle-durum" class="form-control" style="width:100%;">
-          <option value="Açık" ${(e.durum || 'Açık') === 'Açık' ? 'selected' : ''}>Açık</option>
-          <option value="Kapalı" ${(e.durum || 'Açık') === 'Kapalı' ? 'selected' : ''}>Kapalı</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Ekip Rengi</label>
-        <input type="color" id="duzenle-renk" value="${e.renk || '#7c5cff'}" style="width:100%;height:2.5rem;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-surface);padding:0.2rem;cursor:pointer;">
-      </div>
-      <div>
-        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Slogan</label>
-        <input type="text" id="duzenle-slogan" class="form-control" value="${escapeHtml(e.slogan || '')}" placeholder="Ekibin sloganı (opsiyonel)" style="width:100%;">
-      </div>
-      <div>
-        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Kontenjan (max üye)</label>
-        <input type="number" id="duzenle-maxuye" class="form-control" min="1" max="50" value="${e.max_uye || 10}" style="width:100%;">
-      </div>
-      <div>
-        <label style="font-size:0.8rem;font-weight:700;color:var(--text-dim);display:block;margin-bottom:0.3rem;">Açıklama</label>
-        <textarea id="duzenle-aciklama" class="form-control" rows="3" style="width:100%;resize:vertical;">${escapeHtml(e.aciklama || '')}</textarea>
-      </div>
+    <div class="gd-header">
+      <h3>${ekipEmoji(e.kategori)} Ekip Düzenle</h3>
+      <button class="ef-kapat" onclick="closeModal('ekip-detay-modal')" title="Kapat">✕</button>
     </div>
-    <div class="gd-actions" style="margin-top:1.2rem;">
-      <button class="btn btn-primary" style="flex:1" onclick="kaydetEkipDuzenle(${e.id})">💾 Kaydet</button>
-      <button class="btn btn-ghost" style="flex:1" onclick="openEkipDetail(${e.id})">İptal</button>
-    </div>
+    <form class="ef-form" onsubmit="event.preventDefault();kaydetEkipDuzenle(${e.id})">
+      <div class="ef-field">
+        <label class="ef-label" for="duzenle-isim">Ekip Adı</label>
+        <input type="text" id="duzenle-isim" class="form-control" value="${escapeHtml(e.isim)}" placeholder="Ekip adı" required>
+      </div>
+      <div class="ef-row">
+        <div class="ef-field">
+          <label class="ef-label" for="duzenle-kategori">Kategori</label>
+          <select id="duzenle-kategori" class="form-control">${kategoriOptions}</select>
+        </div>
+        <div class="ef-field">
+          <label class="ef-label" for="duzenle-durum">Durum</label>
+          <select id="duzenle-durum" class="form-control">
+            <option value="Açık" ${(e.durum || 'Açık') === 'Açık' ? 'selected' : ''}>Açık</option>
+            <option value="Kapalı" ${(e.durum || 'Açık') === 'Kapalı' ? 'selected' : ''}>Kapalı</option>
+          </select>
+        </div>
+      </div>
+      <div class="ef-row">
+        <div class="ef-field">
+          <label class="ef-label">Ekip Rengi</label>
+          <div class="ef-renk">
+            <input type="color" id="duzenle-renk" value="${e.renk || '#7c5cff'}" oninput="document.getElementById('duzenle-renk-hex').textContent=this.value">
+            <span class="ef-renk-hex" id="duzenle-renk-hex">${e.renk || '#7c5cff'}</span>
+          </div>
+        </div>
+        <div class="ef-field">
+          <label class="ef-label" for="duzenle-maxuye">Kontenjan (Max Üye)</label>
+          <input type="number" id="duzenle-maxuye" class="form-control" min="1" max="50" value="${e.max_uye || 10}">
+        </div>
+      </div>
+      <div class="ef-field">
+        <label class="ef-label" for="duzenle-slogan">Slogan</label>
+        <input type="text" id="duzenle-slogan" class="form-control" value="${escapeHtml(e.slogan || '')}" placeholder="Ekibin sloganı (opsiyonel)">
+      </div>
+      <div class="ef-field">
+        <label class="ef-label" for="duzenle-aciklama">Açıklama</label>
+        <textarea id="duzenle-aciklama" class="form-control" rows="3" style="min-height:90px;" placeholder="Ekip hakkında kısa açıklama">${escapeHtml(e.aciklama || '')}</textarea>
+      </div>
+      <div class="ef-footer">
+        <button type="submit" class="btn btn-primary" style="flex:1">💾 Kaydet</button>
+        <button type="button" class="btn btn-ghost" style="flex:1" onclick="openEkipDetail(${e.id})">İptal</button>
+      </div>
+    </form>
   `;
   modal.classList.add('open');
 }

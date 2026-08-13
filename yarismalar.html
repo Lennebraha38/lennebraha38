@@ -2816,6 +2816,17 @@
     .gd-aciklama { font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 1rem; padding: 1rem; background: var(--bg-surface); border-radius: 12px; }
     .gd-etiketler { margin-bottom: 1rem; display: flex; gap: 0.4rem; flex-wrap: wrap; }
     .gd-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .ef-form { display: flex; flex-direction: column; gap: 1.1rem; margin-top: 1.2rem; }
+    .ef-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .ef-label { font-size: 0.72rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+    .ef-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .ef-row { grid-template-columns: 1fr; } }
+    .ef-renk { display: flex; align-items: center; gap: 0.75rem; }
+    .ef-renk input[type="color"] { width: 2.9rem; height: 2.9rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-surface); cursor: pointer; padding: 0.25rem; flex-shrink: 0; }
+    .ef-renk-hex { font-family: monospace; font-weight: 700; font-size: 0.8rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em; }
+    .ef-footer { display: flex; gap: 0.8rem; margin-top: 0.4rem; padding-top: 1.2rem; border-top: 1px solid var(--border); }
+    .ef-kapat { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 0.3rem; border-radius: 8px; transition: var(--transition); }
+    .ef-kapat:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
     .gd-oncelik { font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 10px; font-weight: 700; }
     #km-overlay {
       display: none;
