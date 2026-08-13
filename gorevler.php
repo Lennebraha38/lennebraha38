@@ -9,11 +9,12 @@
 
       <!-- Ekip Grid -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;">
-        <h3 style="font-size:1rem;font-weight:700;">Ekipler</h3>
+        <h3 style="font-size:1rem;font-weight:700;">Ekiplerim</h3>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
           <button class="btn btn-primary btn-sm" onclick="openModal('ekip-form-modal')">+ Yeni Ekip</button>
         </div>
       </div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1rem;">Ekiplerin yalnızca sana ve üyelerine görünür. Üyelerini ✉️ e-posta davetiyle ekleyebilirsin.</p>
       <div class="ekip-grid" id="ekip-grid"></div>
 
       <!-- Kanban Board -->
@@ -97,6 +98,36 @@
 
   <div id="gorev-detay-modal" onclick="if(event.target===this)closeModal('gorev-detay-modal')">
     <div class="gd-card" id="gorev-detay-content"></div>
+  </div>
+
+  <div id="ekip-detay-modal" onclick="if(event.target===this)closeModal('ekip-detay-modal')">
+    <div class="gd-card" id="ekip-detay-content"></div>
+  </div>
+
+  <div id="ekip-davet-modal" style="position:fixed;inset:0;z-index:5000;background:rgba(5,5,8,0.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;max-width:460px;width:90%;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <h3 style="font-size:1.1rem;font-weight:800;">✉️ Üye Davet Et</h3>
+        <button onclick="closeModal('ekip-davet-modal')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;">✕</button>
+      </div>
+      <input type="hidden" id="davet-ekip-id">
+      <input type="email" id="davet-email" class="form-control" placeholder="Üyenin e-posta adresi" style="margin-bottom:0.8rem;width:100%;">
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1.2rem;">
+        ✅ Davet linki oluşturulur ve e-posta taslağın açılır — <strong>Gönder</strong>'e bastığında üyenin mailine ulaşır.<br>
+        🔗 Üye linke tıklayıp aynı e-postayla giriş yaparsa ekibe katılır.
+      </p>
+      <button class="btn btn-primary" style="width:100%;" onclick="sendDavet()">Daveti Oluştur &amp; Gönder</button>
+    </div>
+  </div>
+
+  <div id="davet-kabul-modal" style="position:fixed;inset:0;z-index:5000;background:rgba(5,5,8,0.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;max-width:440px;width:90%;">
+      <div id="davet-kabul-content"></div>
+      <div style="display:flex;gap:0.8rem;margin-top:1.2rem;">
+        <button class="btn btn-primary" style="flex:1;" onclick="acceptDavet()">Kabul Et 🎉</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="declineDavet()">Reddet</button>
+      </div>
+    </div>
   </div>
 
 <?php include __DIR__ . "/templates/shared/footer.php"; ?>

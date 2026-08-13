@@ -9,6 +9,9 @@ let currentEkipFilter = null;
 let allGorevler = [];
 let allEkipler = [];
 let gorevEkipMap = {};
+let allUyeler = {};          // ekip_id -> [{kullanici_email, rol}]
+let currentUserEmail = null; // oturumdaki kullanicinin e-postasi
+let pendingDavetToken = null;
 
 // XSS korumasi: kullanici verisini guvenli hale getir
 function escapeHtml(str) {
@@ -25,38 +28,247 @@ const ekipEmoji = (k) => EKIP_EMOJILER[k] || '👥';
 
 // ===== EKIP CRUD =====
 async function loadEkipler() {
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) {
+    allEkipler = []; allUyeler = {};
+    renderEkipList(); renderEkipFilter();
+    return;
+  }
+  currentUserEmail = session.user.email;
+  allEkipler = []; allUyeler = {};
+
   const { data, error } = await supabase.from('ekipler').select('*').order('id', { ascending: false });
   if (error) { console.error(error.message); return; }
   allEkipler = data || [];
+
+  const ekipIds = allEkipler.map(e => e.id);
+  if (ekipIds.length) {
+    const { data: uyeler } = await supabase.from('ekip_uyeleri')
+      .select('ekip_id, kullanici_email, rol')
+      .in('ekip_id', ekipIds);
+    (uyeler || []).forEach(u => {
+      if (!allUyeler[u.ekip_id]) allUyeler[u.ekip_id] = [];
+      allUyeler[u.ekip_id].push(u);
+    });
+  }
+
   renderEkipList();
   renderEkipFilter();
 }
 
+const isEkipLider = (e) => currentUserEmail && e.olusturan_email && e.olusturan_email.toLowerCase() === currentUserEmail.toLowerCase();
+
 function renderEkipList() {
   const grid = document.getElementById('ekip-grid');
   if (!grid) return;
-  if (allEkipler.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:2rem;">Henüz ekip oluşturulmadı. İlk ekibi sen kur!</div>';
+
+  if (!currentUserEmail) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:2rem;">Görev ve ekip yönetimi için giriş yapmalısın. 👆</div>';
     return;
   }
-  grid.innerHTML = allEkipler.map(e => `
-    <div class="ekip-card" onclick="filterByEkip('${e.id}')">
+
+  if (allEkipler.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:2rem;">Henüz ekip oluşturmadın. İlk ekibi sen kur, üyeleri e-posta ile davet et!</div>';
+    return;
+  }
+
+  grid.innerHTML = allEkipler.map(e => {
+    const uyeler = allUyeler[e.id] || [];
+    const liderRozeti = isEkipLider(e) ? ' <span class="ekip-lider-badge" title="Takım lideri">👑</span>' : '';
+    const uyeCipleri = [
+      `<span class="ekip-uye-chip lider-chip" title="${escapeHtml(e.olusturan_email)}">${escapeHtml((e.olusturan_email || 'Lider').substring(0, 2).toUpperCase())}</span>`,
+      ...uyeler.slice(0, 2).map(u => `<span class="ekip-uye-chip" title="${escapeHtml(u.kullanici_email)}">${escapeHtml(u.kullanici_email.substring(0, 2).toUpperCase())}</span>`)
+    ];
+    if (uyeler.length > 2) uyeCipleri.push(`<span class="ekip-uye-chip">+${uyeler.length - 2}</span>`);
+    return `
+    <div class="ekip-card" onclick="openEkipDetail(${e.id})">
       <div class="ekip-card-header">
         <span class="ekip-emoji">${ekipEmoji(e.kategori)}</span>
         <span class="ekip-badge">${escapeHtml(e.durum || 'Açık')}</span>
       </div>
-      <h4>${escapeHtml(e.isim)}</h4>
+      <h4>${escapeHtml(e.isim)}${liderRozeti}</h4>
       <p>${escapeHtml((e.aciklama || '').substring(0, 80))}</p>
       <div class="ekip-meta">
-        <span>${e.uye_sayisi || 1}/${e.max_uye || 10} üye</span>
+        <span>${1 + uyeler.length}/${e.max_uye || 10} üye</span>
         <span>${escapeHtml(e.kategori || 'Genel')}</span>
       </div>
+      <div class="ekip-uye-list">${uyeCipleri.join('')}</div>
       <div style="margin-top:0.8rem;display:flex;gap:0.5rem;">
-        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();joinEkip(${e.id})" style="flex:1">+ Katıl</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();filterByEkip('${e.id}')" style="flex:1">Görevler</button>
+        ${isEkipLider(e) ? `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openDavetModal(${e.id})" style="flex:1">✉️ Davet Et</button>` : '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEkipDetail(' + e.id + ')" style="flex:1">Detay</button>'}
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();filterByEkip(${e.id})" style="flex:1">Görevler</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
+}
+
+function openEkipDetail(ekipId) {
+  const e = allEkipler.find(x => x.id === ekipId);
+  if (!e) return;
+  const modal = document.getElementById('ekip-detay-modal');
+  const content = document.getElementById('ekip-detay-content');
+  if (!modal || !content) return;
+
+  const uyeler = allUyeler[e.id] || [];
+  const lider = isEkipLider(e);
+
+  content.innerHTML = `
+    <div class="gd-header">
+      <h3>${ekipEmoji(e.kategori)} ${escapeHtml(e.isim)} ${lider ? '👑' : ''}</h3>
+      <span class="ekip-badge">${escapeHtml(e.durum || 'Açık')}</span>
+    </div>
+    <div class="gd-meta">
+      <span>${escapeHtml(e.kategori || 'Genel')}</span>
+      <span>${1 + uyeler.length}/${e.max_uye || 10} üye</span>
+      <span>${escapeHtml(e.olusturan_email || '')}</span>
+    </div>
+    <div class="gd-aciklama">${escapeHtml(e.aciklama) || '<em>Açıklama yok</em>'}</div>
+    <div style="margin:1rem 0 0.5rem;font-size:0.8rem;font-weight:700;color:var(--text-dim);">ÜYELER</div>
+    <div class="ekip-detay-uyeler">
+      <div class="ekip-detay-uye"><span class="ekip-avatar">👑</span><span>${escapeHtml(e.olusturan_email)}</span><span class="ekip-rol">Lider</span></div>
+      ${uyeler.map(u => `
+        <div class="ekip-detay-uye"><span class="ekip-avatar">${escapeHtml(u.kullanici_email.substring(0, 2).toUpperCase())}</span><span>${escapeHtml(u.kullanici_email)}</span><span class="ekip-rol">Üye</span></div>
+      `).join('')}
+      ${uyeler.length === 0 ? '<div style="color:var(--text-dim);font-size:0.85rem;">Henüz üye yok. Üyeleri davet etmeye başla!</div>' : ''}
+    </div>
+    <div class="gd-actions">
+      ${lider ? `<button class="btn btn-primary" style="flex:1" onclick="closeModal('ekip-detay-modal');openDavetModal(${e.id})">✉️ Üye Davet Et</button>` : ''}
+      <button class="btn btn-ghost" style="flex:1" onclick="filterByEkip(${e.id});closeModal('ekip-detay-modal')">Görevleri Gör</button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function openDavetModal(ekipId) {
+  const modal = document.getElementById('ekip-davet-modal');
+  if (!modal) return;
+  const davetEkipId = document.getElementById('davet-ekip-id');
+  if (davetEkipId) davetEkipId.value = ekipId;
+  const input = document.getElementById('davet-email');
+  if (input) input.value = '';
+  modal.classList.add('open');
+}
+
+async function sendDavet() {
+  const ekipId = parseInt(document.getElementById('davet-ekip-id')?.value);
+  const email = document.getElementById('davet-email')?.value?.trim();
+  const ekip = allEkipler.find(e => e.id === ekipId);
+  if (!ekip) { showToast('Ekip bulunamadı!'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Geçerli bir e-posta girin!'); return; }
+
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) { showToast('Önce giriş yap!'); return; }
+  if (!isEkipLider(ekip)) { showToast('Sadece takım lideri davet gönderebilir!'); return; }
+
+  const uyeler = allUyeler[ekipId] || [];
+  if (1 + uyeler.length >= ekip.max_uye) { showToast('Ekip kontenjanı dolu!'); return; }
+  if (ekip.olusturan_email?.toLowerCase() === email.toLowerCase() || uyeler.some(u => u.kullanici_email?.toLowerCase() === email.toLowerCase())) {
+    showToast('Bu kişi zaten ekibin üyesi!'); return;
+  }
+
+  const token = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+  const davet = { ekip_id: ekipId, email, token, davet_eden_email: session.user.email, durum: 'bekliyor' };
+
+  const { error } = await supabase.from('ekip_davetleri').insert(davet);
+  if (error) {
+    if (error.code === '23505') {
+      const { data: eski, error: selErr } = await supabase.from('ekip_davetleri')
+        .select('id').eq('ekip_id', ekipId).eq('email', email).single();
+      if (selErr || !eski) { showToast('Davet oluşturulamadı!'); return; }
+      const { error: upErr } = await supabase.from('ekip_davetleri')
+        .update({ token, durum: 'bekliyor' }).eq('id', eski.id);
+      if (upErr) { console.error(upErr.message); showToast('Davet oluşturulamadı!'); return; }
+    } else { console.error(error.message); showToast('Davet oluşturulamadı!'); return; }
+  }
+
+  const link = window.location.origin + window.location.pathname + '?davet=' + token;
+  const subject = encodeURIComponent(`[Quantro] "${ekip.isim}" takımına davet edildin 🚀`);
+  const body = encodeURIComponent(
+    `Merhaba,\n\n"${ekip.isim}" takımına davet edildin!\n\nEkibe katılmak için aşağıdaki linke tıkla:\n${link}\n\nBu link sadece senin e-postan için geçerlidir.\n\n— ${session.user.email}`
+  );
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+
+  closeModal('ekip-davet-modal');
+  showToast('Davet oluşturuldu — e-posta taslağı açıldı, Gönder\'e bas!');
+}
+
+// ===== DAVET KABUL AKISI =====
+async function handleDavetLink() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('davet');
+  if (!token) return;
+  pendingDavetToken = token;
+  history.replaceState(null, '', window.location.pathname);
+
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) {
+    showToast('Bu daveti kabul etmek için önce giriş yapmalısın!');
+    showAuthOverlay();
+    return;
+  }
+  await showDavetKabulModal(token);
+}
+
+async function showDavetKabulModal(token) {
+  const { data: davet, error } = await supabase.from('ekip_davetleri')
+    .select('*, ekipler(isim)').eq('token', token).single();
+  if (error || !davet) { showToast('Davet bulunamadı, süresi doldu veya başka bir e-postaya ait.'); pendingDavetToken = null; return; }
+
+  const modal = document.getElementById('davet-kabul-modal');
+  const content = document.getElementById('davet-kabul-content');
+  if (!modal || !content) return;
+  content.innerHTML = `
+    <div style="text-align:center;padding:0.5rem 0;">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem;">🤝</div>
+      <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:0.5rem;">${escapeHtml(davet.ekipler?.isim || 'Takım')} takımına davetlisin!</h3>
+      <p style="color:var(--text-dim);font-size:0.9rem;">${escapeHtml(davet.davet_eden_email || 'Takım lideri')} seni ekibine davet etti. Kabul ederek ${escapeHtml(davet.ekipler?.isim || '')} panosundaki görevleri görebilirsin.</p>
+      <p style="color:var(--text-dim);font-size:0.8rem;margin-top:0.5rem;">Davet: <strong>${escapeHtml(davet.email)}</strong> — giriş yaptığın hesabın e-postasıyla aynı olmalı.</p>
+    </div>
+  `;
+  modal.classList.add('open');
+  showToast('Davetin geldi! Kabul ediyor musun?');
+}
+
+async function acceptDavet() {
+  if (!pendingDavetToken) return;
+  const token = pendingDavetToken;
+
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session) { showToast('Önce giriş yapmalısın!'); showAuthOverlay(); return; }
+
+  try {
+    const { data, error } = await supabase.rpc('ekip_daveti_kabul', { p_token: token });
+    if (error) throw error;
+    pendingDavetToken = null;
+    closeModal('davet-kabul-modal');
+    showToast(data === 'zaten_uye' ? 'Zaten bu ekiptesin!' : '🎉 Takıma katıldın!');
+    await loadEkipler();
+    await loadGorevler(currentEkipFilter);
+  } catch (err) {
+    const msg = err.message || '';
+    if (msg.includes('DAVET_BULUNAMADI')) showToast('Davet bulunamadı veya süresi doldu.');
+    else if (msg.includes('EPOSTA_ESLESMIYOR')) showToast('Bu davet, giriş yaptığın e-postayla eşleşmiyor! Davet edilen adresle giriş yap.');
+    else if (msg.includes('EKIP_DOLU')) showToast('Ekip kontenjanı dolu, katılamazsın.');
+    else { console.error(err); showToast('Davet kabul edilemedi!'); }
+  }
+}
+
+function declineDavet() {
+  pendingDavetToken = null;
+  closeModal('davet-kabul-modal');
+  showToast('Davet reddedildi.');
+}
+
+function showAuthOverlay() {
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    overlay.classList.remove('hiding');
+    const tab = document.getElementById('tab-login');
+    if (tab && typeof switchAuthTab === 'function') switchAuthTab('login');
+  } else {
+    window.location.href = 'giris.php';
+  }
 }
 
 function renderEkipFilter() {
@@ -102,32 +314,7 @@ async function createEkip() {
 }
 
 async function joinEkip(ekipId) {
-  const session = (await supabase.auth.getSession()).data.session;
-  if (!session) { showToast('Önce giriş yap!'); return; }
-
-  const ekip = allEkipler.find(e => e.id === ekipId);
-  if (ekip && ekip.uye_sayisi >= ekip.max_uye) { showToast('Bu ekip dolu!'); return; }
-
-  const { error } = await supabase.from('ekip_uyeleri').insert({
-    ekip_id: ekipId,
-    kullanici_email: session.user.email,
-    kullanici_id: session.user.id,
-    rol: 'uye'
-  });
-
-  if (error) {
-    if (error.code === '23505') { showToast('Zaten bu ekiptesin!'); }
-    else { showToast('Katılım başarısız!'); }
-    return;
-  }
-
-  const { error: upErr } = await supabase.from('ekipler')
-    .update({ uye_sayisi: (ekip ? ekip.uye_sayisi : 0) + 1 })
-    .eq('id', ekipId);
-  if (upErr) console.error(upErr.message);
-
-  await loadEkipler();
-  showToast('Ekibe katıldın!');
+  showToast('Ekiplere katılım artık davet ile. Liderden davet linki iste!');
 }
 
 // ===== GOREV CRUD =====
@@ -322,6 +509,9 @@ function setupGorevRealtime() {
   supabase.channel('ekipler-rt')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'ekipler' }, () => { loadEkipler(); })
     .subscribe();
+  supabase.channel('ekip_uyeleri-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'ekip_uyeleri' }, () => { loadEkipler(); })
+    .subscribe();
 }
 
 // Init
@@ -329,6 +519,17 @@ async function initTaskBoard() {
   await loadEkipler();
   await loadGorevler(null);
   setupGorevRealtime();
+  await handleDavetLink();
+
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN') {
+      currentUserEmail = null;
+      loadEkipler();
+      loadGorevler(null);
+      if (pendingDavetToken) showDavetKabulModal(pendingDavetToken);
+    }
+  });
+
   console.log('Gorev & Ekip sistemi hazir!');
 }
 

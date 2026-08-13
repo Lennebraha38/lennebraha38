@@ -2765,6 +2765,14 @@
     .ekip-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
     .ekip-card p { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.8rem; line-height: 1.4; }
     .ekip-meta { display: flex; gap: 1rem; font-size: 0.75rem; color: var(--text-dim); }
+    .ekip-lider-badge { font-size: 0.9rem; }
+    .ekip-uye-list { display: flex; gap: 0.3rem; margin-top: 0.6rem; flex-wrap: wrap; }
+    .ekip-uye-chip { width: 26px; height: 26px; border-radius: 50%; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-dim); font-size: 0.65rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .ekip-uye-chip.lider-chip { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .ekip-detay-uyeler { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    .ekip-detay-uye { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.5rem 0.8rem; }
+    .ekip-detay-uye .ekip-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 0.65rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ekip-detay-uye .ekip-rol { margin-left: auto; font-size: 0.7rem; font-weight: 600; color: var(--text-dim); }
 
     .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
     @media (max-width: 1024px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
