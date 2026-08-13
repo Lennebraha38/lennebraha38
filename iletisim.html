@@ -2807,6 +2807,8 @@
     /* Gorev & Ekip form modallari (acilma hatasi duzeltildi) */
     #ekip-form-modal, #gorev-form-modal { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.3s; }
     #ekip-form-modal.open, #gorev-form-modal.open { opacity: 1 !important; pointer-events: all !important; }
+    #ekip-detay-modal, #ekip-davet-modal, #davet-kabul-modal { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.3s; }
+    #ekip-detay-modal.open, #ekip-davet-modal.open, #davet-kabul-modal.open { opacity: 1 !important; pointer-events: all !important; }
     .gd-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 2rem; max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto; }
     .gd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
     .gd-header h3 { font-size: 1.2rem; font-weight: 800; }
