@@ -113,9 +113,9 @@
       <div id="davet-form">
         <input type="email" id="davet-email" class="form-control" placeholder="Üyenin e-posta adresi" style="margin-bottom:0.8rem;width:100%;">
         <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1.2rem;">
-          ✅ Davet linki oluşturulur ve e-posta taslağın açılır — <strong>Gönder</strong>'e bastığında üyenin mailine ulaşır.<br>
+          ✅ Davet linki oluşturulur, <strong>Gmail ile Gönder</strong>'e bastığında Gmail'in açılır (adres ve mesaj dolu).<br>
           🔗 Üye linke tıklayıp aynı e-postayla giriş yaparsa ekibe katılır.<br>
-          📱 E-posta programın açılmıyorsa linki <strong>Kopyala</strong> ile alıp elle gönderebilirsin.
+          📱 Gmail açılmıyorsa linki <strong>Kopyala</strong> ile alıp elle gönderebilirsin.
         </p>
         <button class="btn btn-primary" style="width:100%;" onclick="sendDavet()">Daveti Oluştur</button>
       </div>
@@ -129,7 +129,7 @@
           <button class="btn btn-primary btn-sm" onclick="kopyalaDavetLinki()" style="white-space:nowrap;">📋 Kopyala</button>
         </div>
         <div style="display:flex;gap:0.5rem;">
-          <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="acMailto()">✉️ E-posta taslağı</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="gmailIleGonder()">📧 Gmail ile Gönder</button>
           <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="yeniDavet()">+ Yeni Davet</button>
         </div>
       </div>

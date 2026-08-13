@@ -183,17 +183,7 @@ function openDavetModal(ekipId) {
   modal.classList.add('open');
 }
 
-// ===== OTOMATIK EPOSTA (EmailJS) =====
-// EmailJS (emailjs.com) ucretsiz: 200 e-posta/ay. Kurulum:
-// 1) emailjs.com -> hesap ac -> Email Services -> Gmail bagla -> Service ID
-// 2) Email Templates -> yeni sablon: To Email: {{to_email}}, Subject: "[Quantro] {{takim_adi}} takimina davet edildin 🚀",
-//    Icerik: "Merhaba {{to_name}},\n\n\"{{takim_adi}}\" takimina davet edildin!\n\nEkibe katilmak icin tikla: {{davet_linki}}\n\n— {{davet_eden}}"
-// 3) Account -> API Keys -> Public Key
-const EMAILJS_SERVICE_ID = '';
-const EMAILJS_TEMPLATE_ID = '';
-const EMAILJS_PUBLIC_KEY = '';
-
-let davetMailtoUrl = null;
+let davetGmailUrl = null;
 let sonGonderimEmail = null;
 
 function kopyalaDavetLinki() {
@@ -214,8 +204,8 @@ function fallbackCopy(text, done) {
   ta.remove();
   done();
 }
-function acMailto() {
-  if (davetMailtoUrl) window.open(davetMailtoUrl, '_blank');
+function gmailIleGonder() {
+  if (davetGmailUrl) window.open(davetGmailUrl, '_blank');
 }
 function yeniDavet() {
   const form = document.getElementById('davet-form');
@@ -259,28 +249,14 @@ async function sendDavet() {
   }
 
   const link = window.location.origin + window.location.pathname + '?davet=' + token;
-  const subject = encodeURIComponent(`[Quantro] "${ekip.isim}" takımına davet edildin 🚀`);
-  const body = encodeURIComponent(
-    `Merhaba,\n\n"${ekip.isim}" takımına davet edildin!\n\nEkibe katılmak için aşağıdaki linke tıkla:\n${link}\n\nBu link sadece senin e-postan için geçerlidir.\n\n— ${session.user.email}`
-  );
-  davetMailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
-  sonGonderimEmail = email;
 
-  // Otomatik e-posta (EmailJS) — basarisiz olursa link/kopyala ekranina dus
-  let otomatikGitti = false;
-  try {
-    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY && window.emailjs) {
-      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_email: email,
-        to_name: email.split('@')[0],
-        takim_adi: ekip.isim,
-        davet_eden: session.user.email,
-        davet_linki: link
-      });
-      otomatikGitti = true;
-    }
-  } catch (e) { console.error('Otomatik e-posta gönderilemedi:', e); }
+  // Gmail compose baglantisi: butona tiklayinca adres/mesaj dolu sekilde Gmail'e yonlendirir
+  davetGmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email)
+    + '&su=' + encodeURIComponent(`[Quantro] "${ekip.isim}" takımına davet edildin 🚀`)
+    + '&body=' + encodeURIComponent(
+        `Merhaba,\n\n"${ekip.isim}" takımına davet edildin!\n\nEkibe katılmak için aşağıdaki linke tıkla:\n${link}\n\nBu link sadece senin e-postan için geçerlidir.\n\n— ${session.user.email}`
+      );
+  sonGonderimEmail = email;
 
   // Sonuc ekranini goster
   const form = document.getElementById('davet-form');
@@ -291,12 +267,10 @@ async function sendDavet() {
   if (sonuc) sonuc.style.display = 'block';
   if (linkEl) linkEl.value = link;
   if (durumEl) {
-    durumEl.textContent = otomatikGitti
-      ? `📧 Davet e-postası ${email} adresine gönderildi!`
-      : (EMAILJS_SERVICE_ID ? '⚠️ E-posta gönderilemedi — linki kopyalayıp elle gönder.' : 'Davet hazır — linki kopyalayıp gönder (otomatik e-posta için EmailJS kurulumu gerekli).');
+    durumEl.textContent = `Gmail'e yönlendirileceksin — ${email} adresine önceden doldurulmuş gönder.`;
   }
 
-  showToast(otomatikGitti ? '📧 Davet e-postası gönderildi!' : 'Davet oluşturuldu — linki üyene gönder!');
+  showToast('Davet oluşturuldu — Gmail butonuna tıkla!');
 }
 
 // ===== DAVET KABUL AKISI =====
