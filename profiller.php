@@ -123,7 +123,7 @@
 
       </div>
 
-      <div style="text-align:center;margin-top:2.5rem;" class="reveal" id="profil-empty-msg" style="display:none;"></div>
+      <div style="text-align:center;margin-top:2.5rem;display:none;" id="profil-empty-msg"></div>
     </div>
   </section>
 

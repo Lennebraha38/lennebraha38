@@ -272,8 +272,8 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') window.closeKM();
     });
-  })();
   </script>
+<script>
 initPage = async function() { if (typeof loadKategoriler === "function") await loadKategoriler(); };
 </script>
 <?php include __DIR__ . "/templates/shared/shared-js.php"; ?>

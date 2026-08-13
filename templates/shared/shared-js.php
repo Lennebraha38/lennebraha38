@@ -113,7 +113,8 @@ function createIlanCardElement(ilan, currentUserEmail) {
     '<p class="ilan-card-desc">'+escapeHtml((ilan.aciklama||'').substring(0,150))+((ilan.aciklama||'').length>150?'...':'')+'</p>'+
     '<div class="ilan-card-tags">'+tags+'</div>'+
     '<div class="ilan-card-meta"><span>📍 '+escapeHtml(sehir)+'</span><span>👥 '+escapeHtml(ilan.kisi||'1 Kişi')+'</span></div>'+
-    (isOwner ? '<button class="btn btn-ghost btn-sm" style="color:#f87171;border-color:rgba(239,68,68,0.2);margin-top:0.3rem" onclick="event.stopPropagation();deleteIlanCard(this)" title="İlanı sil"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 14.142A2 2 0 0 1 16.138 22H7.862a2 2 0 0 1-1.995-1.858L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>Sil</button>' : '');
+    (isOwner ? '<button class="btn btn-ghost btn-sm" style="color:#f87171;border-color:rgba(239,68,68,0.2);margin-top:0.3rem" onclick="event.stopPropagation();deleteIlanCard(this)" title="İlanı sil"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 14.142A2 2 0 0 1 16.138 22H7.862a2 2 0 0 1-1.995-1.858L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>Sil</button>'
+      : '<button class="btn btn-ghost btn-sm" style="margin-top:0.3rem" data-ilan-adi="'+escapeHtml(ilan.baslik||'')+'" onclick="event.stopPropagation();handleBasvur(this, this.dataset.ilanAdi)" title="Bu ilana başvur">Başvur →</button>');
   return card;
 }
 
@@ -540,6 +541,17 @@ else { initApp(); }
 
       cards.forEach(card => card.style.display = 'none');
 
+      // Boş durum: filtreler aktif ama eşleşen yok
+      const emptyMsg = document.getElementById('ilanlar-empty-msg');
+      if (emptyMsg) {
+        if (matched.length === 0 && activeIlanFilters.size > 0) {
+          emptyMsg.style.display = 'block';
+          emptyMsg.innerHTML = '<div class="empty-icon">🔍</div><h4>Eşleşen ilan yok</h4><p>Seçili filtrelerle eşleşen ilan bulunamadı.</p><button class="btn btn-primary btn-sm" style="margin-top:0.7rem;" onclick="resetIlanFilter()">Filtreleri Temizle</button>';
+        } else if (matched.length > 0) {
+          emptyMsg.style.display = 'none';
+        }
+      }
+
       const visible = showAllIlanlar ? matched : matched.slice(0, ILAN_LIMIT);
       visible.forEach(card => {
         card.style.display   = 'flex';
@@ -574,10 +586,23 @@ else { initApp(); }
       renderIlanlarWithLimit();
     }
 
-    function deleteIlanCard(btn) {
+    function resetIlanFilter() {
+      activeIlanFilters.clear();
+      showAllIlanlar = false;
+      document.querySelectorAll('#ilanlar .filter-btns .btn').forEach(b => {
+        const isAll = b.dataset.tag === 'all';
+        b.classList.toggle('btn-primary', isAll);
+        b.classList.toggle('btn-ghost', !isAll);
+      });
+      renderIlanlarWithLimit();
+    }
+
+    async function deleteIlanCard(btn) {
       const card = btn.closest('.ilan-card');
       const baslik = card.dataset.baslik || card.querySelector('h4')?.textContent.trim() || 'bu ilan';
       if (!confirm(`"${baslik}" ilanını silmek istediğine emin misin?`)) return;
+      const ok = await supabaseDeleteIlan(card.dataset.id);
+      if (!ok) { showToast('⚠️ İlan silinemedi!'); return; }
       card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
       card.style.opacity = '0';
       card.style.transform = 'scale(0.95)';
@@ -662,8 +687,17 @@ else { initApp(); }
     async function applyFromDetail(ilanAdi) {
       const btn = document.getElementById('idm-apply-btn');
       const session = (await supabase.auth.getSession()).data.session;
+      if (!session) { showToast('⚠️ Başvuru için önce giriş yapmalısın!'); return; }
+      const email = session.user.email;
+      const { data: existing } = await supabase.from('mesajlar')
+        .select('id').eq('gonderen_email', email).eq('konu', 'İlan Başvurusu').eq('proje', ilanAdi).limit(1);
+      if (existing && existing.length) {
+        if (btn) { btn.textContent = '✓ Başvuruldu'; btn.disabled = true; btn.style.boxShadow = 'none'; }
+        showToast('ℹ️ Bu ilana zaten başvurdun.');
+        return;
+      }
       const { error } = await supabase.from('mesajlar').insert({
-        gonderen_ad: session?.user?.user_metadata?.full_name || 'Ziyaretçi',
+        gonderen_ad: session?.user?.user_metadata?.full_name || 'Kullanıcı',
         gonderen_email: session?.user?.email || '',
         konu: 'İlan Başvurusu',
         mesaj: `"${ilanAdi}" ilanına başvuru yapıldı.`,
@@ -682,7 +716,30 @@ else { initApp(); }
     }
 
     /* ---- BAŞVUR HANDLER ---- */
-    function handleBasvur(btn, ilanAdi) {
+    async function handleBasvur(btn, ilanAdi) {
+      if (btn.disabled) return;
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) { showToast('⚠️ Başvuru için önce giriş yapmalısın!'); return; }
+      const email = session.user.email;
+      const { data: existing } = await supabase.from('mesajlar')
+        .select('id').eq('gonderen_email', email).eq('konu', 'İlan Başvurusu').eq('proje', ilanAdi).limit(1);
+      if (existing && existing.length) {
+        btn.textContent = '✓ Başvuruldu';
+        btn.disabled = true;
+        btn.style.background = 'rgba(16,185,129,0.2)';
+        btn.style.color = '#10b981';
+        btn.style.borderColor = 'rgba(16,185,129,0.3)';
+        showToast('ℹ️ Bu ilana zaten başvurdun.');
+        return;
+      }
+      const { error } = await supabase.from('mesajlar').insert({
+        gonderen_ad: session.user.user_metadata?.full_name || 'Kullanıcı',
+        gonderen_email: email,
+        konu: 'İlan Başvurusu',
+        mesaj: `"${ilanAdi}" ilanına başvuru yapıldı.`,
+        proje: ilanAdi
+      });
+      if (error) { console.error(error.message); showToast('⚠️ Başvuru gönderilemedi!'); return; }
       btn.textContent = '✓ Başvuruldu';
       btn.disabled = true;
       btn.style.background = 'rgba(16,185,129,0.2)';
@@ -1216,7 +1273,9 @@ else { initApp(); }
         card.style.display = show ? '' : 'none';
         if (show) visible++;
       });
+      const cards = document.querySelectorAll('.profil-card');
       const emptyEl = document.getElementById('profil-empty-msg');
+      if (!cards.length) { if (emptyEl) emptyEl.style.display = 'none'; return; }
       if (visible === 0) {
         emptyEl.innerHTML = '<p style="color:var(--text-dim);font-size:0.95rem;">🔍 Aramanızla eşleşen profil bulunamadı. <button class="btn btn-ghost btn-sm" onclick="resetProfilFilter()">Filtreleri Temizle</button></p>';
         emptyEl.style.display = 'block';
