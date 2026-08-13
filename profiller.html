@@ -205,6 +205,7 @@
     .bg-orb-1 { width: 700px; height: 700px; top: -200px; right: -200px; background: radial-gradient(circle, #1E3A5F, transparent 70%); }
     .bg-orb-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: radial-gradient(circle, #152238, transparent 70%); animation-delay: -10s; }
     .bg-orb-3 { width: 400px; height: 400px; top: 50%; left: 40%; background: radial-gradient(circle, rgba(34,211,238,0.3), transparent 70%); animation-delay: -20s; opacity: 0.1; }
+    @media (max-width: 600px) { .bg-orb { display: none; } }
 
     @keyframes orbFloat {
       0%   { transform: translate(0,0) scale(1); }
@@ -2567,6 +2568,7 @@
       transition: color 0.15s;
     }
     .gac-pw-toggle:hover { color: #e8eaed; }
+    .pw-toggle, .gac-pw-toggle, .ai-modal-close, .gac-close-btn, .ef-kapat { min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; }
 
     .gac-error {
       background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
