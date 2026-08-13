@@ -641,7 +641,7 @@ function renderKanbanBoard() {
           ${g.atanan_email ? `<span class="gorev-avatar" title="${escapeHtml(g.atanan_email)}">${escapeHtml(g.atanan_email.substring(0,2).toUpperCase())}</span>` : ''}
         </div>
       </div>
-    `).join('');
+    `).join('') + (gorevler.length ? '' : '<div class="gorev-bos">Burada görev yok — sürükle ya da ekle.</div>');
     el.innerHTML += `<div class="gorev-count">${gorevler.length} görev</div>`;
   });
 }

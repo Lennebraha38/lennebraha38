@@ -2804,6 +2804,7 @@
     .gorev-etiket { font-size: 0.6rem; padding: 0.15rem 0.5rem; border-radius: 8px; background: rgba(139,92,246,0.15); color: #8b5cf6; font-weight: 600; }
     .gorev-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); font-size: 0.55rem; font-weight: 800; display: flex; align-items: center; justify-content: center; color: white; }
     .gorev-count { font-size: 0.7rem; color: var(--text-dim); text-align: center; padding-top: 0.5rem; }
+    .gorev-bos { font-size: 0.78rem; color: var(--text-dim); text-align: center; padding: 1.2rem 0.5rem; border: 1px dashed var(--border); border-radius: 12px; }
 
     /* Gorev Detay Modal */
     #gorev-detay-modal { position: fixed; inset: 0; z-index: 5000; background: rgba(5,5,8,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }

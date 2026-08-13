@@ -380,6 +380,39 @@ function overrideAuthFunctions() {
   ['closeGoogleMock','gacSelectAccount','googleShowEmailStep','googleNextStep','googleBackStep','toggleGacPw','confirmGoogleLogin'].forEach(fn => { window[fn] = function(){}; });
 }
 
+// ===== HATA IZLEME (gizli, ?debug=1 ile panel) =====
+window.__QT_HATALAR = [];
+try { window.__QT_HATALAR = JSON.parse(localStorage.getItem('quantro-hatalar') || '[]'); } catch (e) {}
+function __qtHataKaydet(kayit) {
+  window.__QT_HATALAR.push(kayit);
+  if (window.__QT_HATALAR.length > 40) window.__QT_HATALAR.shift();
+  try { localStorage.setItem('quantro-hatalar', JSON.stringify(window.__QT_HATALAR)); } catch (e) {}
+}
+window.addEventListener('error', function (e) {
+  __qtHataKaydet({ t: new Date().toISOString(), tip: 'error', msg: String(e.message || '').slice(0, 220), yer: String(e.filename || '').split('/').pop() + ':' + (e.lineno || '') });
+});
+window.addEventListener('unhandledrejection', function (e) {
+  __qtHataKaydet({ t: new Date().toISOString(), tip: 'promise', msg: String(e.reason).slice(0, 220), yer: '' });
+});
+window.qtDebugPanel = function () {
+  let panel = document.getElementById('qt-debug-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'qt-debug-panel';
+    panel.style.cssText = 'position:fixed;bottom:1rem;right:1rem;z-index:99999;width:340px;max-height:60vh;overflow:auto;background:#0b0f17;border:1px solid #2a3a55;border-radius:14px;padding:1rem;font-family:monospace !important;font-size:11px;color:#c7d3e8;box-shadow:0 12px 40px rgba(0,0,0,.5);';
+    document.body.appendChild(panel);
+  }
+  const list = window.__QT_HATALAR.length ? window.__QT_HATALAR.slice().reverse().map(h =>
+    `<div style="border-bottom:1px solid #22304a;padding:.4rem 0;"><b style="color:#f87171">[${h.tip}]</b> ${h.msg.replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}<br><span style="color:#64748b">${h.t} ${h.yer}</span></div>`
+  ).join('') : '<div style="color:#34d399">Sıfır hata kaydı 🎉</div>';
+  panel.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;"><b style="color:#93c5fd">🧪 Quantro Hata Kaydı</b><span><button id="qt-debug-temiz" style="background:#1e293b;border:1px solid #334155;color:#cbd5e1;border-radius:8px;padding:.2rem .6rem;cursor:pointer;font-size:10px;margin-right:.3rem;">Temizle</button><button id="qt-debug-kapat" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;">✕</button></span></div>${list}`;
+  document.getElementById('qt-debug-kapat').onclick = () => panel.remove();
+  document.getElementById('qt-debug-temiz').onclick = () => { window.__QT_HATALAR = []; localStorage.removeItem('quantro-hatalar'); qtDebugPanel(); };
+};
+if (new URLSearchParams(location.search).has('debug')) {
+  window.addEventListener('load', () => setTimeout(window.qtDebugPanel, 800));
+}
+
 // ===== TEMA YONETIMI =====
 let currentTheme = localStorage.getItem('quantro-theme') || 'dark';
 function applyTheme(theme) {
