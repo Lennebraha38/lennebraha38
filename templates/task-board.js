@@ -167,7 +167,18 @@ async function renderEkipDuyurulari(ekipId) {
     .eq('ekip_id', ekipId)
     .order('olusturulma_tarihi', { ascending: false })
     .limit(20);
-  if (error) { liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Duyurular yüklenemedi.</div>'; return; }
+  if (error) {
+    if (/Could not find the table/.test(error.message)) {
+      // migration henuz calistirilmamis — duyuru bolumunu sessizce gizle
+      const form = document.getElementById('duyuru-form');
+      if (form) form.style.display = 'none';
+      liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;"></div>';
+      const lbl = Array.from(document.querySelectorAll('#ekip-detay-content div')).find(d => d.textContent.trim() === 'DUYURULAR');
+      if (lbl) lbl.style.display = 'none';
+      return;
+    }
+    liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Duyurular yüklenemedi.</div>'; return;
+  }
   if (!data || !data.length) { liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Henüz duyuru yok.</div>'; return; }
   liste.innerHTML = data.map(d => `
     <div class="ekip-detay-uye" style="align-items:flex-start;">
@@ -319,7 +330,11 @@ async function kaydetEkipDuzenle(ekipId) {
   if (!isim) { showToast('Ekip adı boş olamaz!'); return; }
   if (maxUye < 1 || maxUye > 50) { showToast('Kontenjan 1-50 arası olmalı!'); return; }
 
-  const { error } = await supabase.from('ekipler').update({ isim, kategori, durum, aciklama, renk, slogan, max_uye: maxUye }).eq('id', ekipId);
+  let { error } = await supabase.from('ekipler').update({ isim, kategori, durum, aciklama, renk, slogan, max_uye: maxUye }).eq('id', ekipId);
+  if (error && /renk|slogan/.test(error.message)) {
+    // yeni kolonlar DB'de yok (migration calistirilmamis) — temel alanlarla tekrar dene
+    ({ error } = await supabase.from('ekipler').update({ isim, kategori, durum, aciklama, max_uye: maxUye }).eq('id', ekipId));
+  }
   if (error) { console.error(error.message); showToast('Güncellenemedi: ' + error.message); return; }
 
   showToast('✅ Ekip güncellendi!');
