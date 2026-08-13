@@ -91,7 +91,7 @@ async function loadIlanlar() {
 
 function createIlanCardElement(ilan, currentUserEmail) {
   const isOwner = currentUserEmail && ilan.kullanici_email === currentUserEmail;
-  const badgeClass = { 'Açık': 'badge-success', 'Yeni': 'badge-yeni', 'Son Gün': 'badge-warn' }[ilan.durum] || 'badge-warn';
+  const badgeClass = { 'Açık': 'badge-acik', 'Yeni': 'badge-yeni', 'Son Gün': 'badge-yakin' }[ilan.durum] || 'badge-yakin';
   const tipEmoji = ilan.emoji || { 'takim': '🤝', 'proje': '🚀', 'mentor': '🎓' }[ilan.ilan_tipi] || '📌';
   const card = document.createElement('div');
   card.className = 'ilan-card';
@@ -601,37 +601,37 @@ else { initApp(); }
       const isOwner   = card.dataset.owner === 'true';
 
       const tagHTML = etiketler.split(',').map(t => t.trim()).filter(Boolean)
-        .map(t => `<span class="idm-tag">${t}</span>`).join('');
+        .map(t => `<span class="idm-tag">${escapeHtml(t)}</span>`).join('');
 
       const overlay = document.getElementById('ilan-detail-overlay');
       overlay.innerHTML = `
         <div class="ilan-detail-modal">
           <div class="idm-header">
             <div>
-              <span class="ilan-badge ${badgeClass}" style="margin-bottom:0.8rem;display:inline-flex;">${badge}</span>
-              <div class="idm-title">${baslik}</div>
+              <span class="ilan-badge ${badgeClass}" style="margin-bottom:0.8rem;display:inline-flex;">${escapeHtml(badge)}</span>
+              <div class="idm-title">${escapeHtml(baslik)}</div>
             </div>
             <button class="idm-close-btn" onclick="closeIlanDetail()">✕</button>
           </div>
           <div class="idm-body">
             <div>
               <div class="idm-section-title">Açıklama</div>
-              <div class="idm-desc">${aciklama || '<span style="color:var(--text-dim);font-style:italic;">Açıklama eklenmemiş.</span>'}</div>
+              <div class="idm-desc">${escapeHtml(aciklama) || '<span style="color:var(--text-dim);font-style:italic;">Açıklama eklenmemiş.</span>'}</div>
             </div>
             <div>
               <div class="idm-section-title">Detaylar</div>
               <div class="idm-info-grid">
                 <div class="idm-info-chip">
                   <div class="chip-icon">📍</div>
-                  <div><div class="chip-label">Konum</div><div class="chip-val">${sehir || '—'}</div></div>
+                  <div><div class="chip-label">Konum</div><div class="chip-val">${escapeHtml(sehir) || '—'}</div></div>
                 </div>
                 <div class="idm-info-chip">
                   <div class="chip-icon">${tipEmoji}</div>
-                  <div><div class="chip-label">Tür</div><div class="chip-val">${tip || '—'}</div></div>
+                  <div><div class="chip-label">Tür</div><div class="chip-val">${escapeHtml(tip) || '—'}</div></div>
                 </div>
                 <div class="idm-info-chip" style="grid-column:1/-1;">
                   <div class="chip-icon">👥</div>
-                  <div><div class="chip-label">Aranan Kişi</div><div class="chip-val">${kisi || '—'}</div></div>
+                  <div><div class="chip-label">Aranan Kişi</div><div class="chip-val">${escapeHtml(kisi) || '—'}</div></div>
                 </div>
               </div>
             </div>
@@ -644,7 +644,7 @@ else { initApp(); }
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
                   Kendi İlanın
                 </button>`
-              : `<button class="idm-apply-btn" id="idm-apply-btn" onclick="applyFromDetail('${baslik.replace(/'/g,"\\'")}')">
+              : `<button class="idm-apply-btn" id="idm-apply-btn" onclick="applyFromDetail(this.dataset.ilanAdi)" data-ilan-adi="${escapeHtml(baslik)}">
                   Başvur →
                 </button>`
             }
@@ -659,8 +659,17 @@ else { initApp(); }
       document.body.style.overflow = '';
     }
 
-    function applyFromDetail(ilanAdi) {
+    async function applyFromDetail(ilanAdi) {
       const btn = document.getElementById('idm-apply-btn');
+      const session = (await supabase.auth.getSession()).data.session;
+      const { error } = await supabase.from('mesajlar').insert({
+        gonderen_ad: session?.user?.user_metadata?.full_name || 'Ziyaretçi',
+        gonderen_email: session?.user?.email || '',
+        konu: 'İlan Başvurusu',
+        mesaj: `"${ilanAdi}" ilanına başvuru yapıldı.`,
+        proje: ilanAdi
+      });
+      if (error) { console.error(error.message); showToast('⚠️ Başvuru gönderilemedi!'); return; }
       if (btn) {
         btn.textContent = '✓ Başvuruldu';
         btn.disabled = true;
@@ -880,7 +889,8 @@ else { initApp(); }
         if (isToday) cell.classList.add('today');
 
         const key = getEventKey(calYear, calMonth, d);
-        if (EVENTS[key]) cell.classList.add('has-event');
+        const SRC = window._dynamicEvents || EVENTS;
+        if (SRC[key]) cell.classList.add('has-event');
 
         const isSelected = selectedDay && selectedDay.y === calYear && selectedDay.m === calMonth && selectedDay.d === d;
         if (isSelected) cell.classList.add('selected');
@@ -899,7 +909,8 @@ else { initApp(); }
     function renderEventPanel(y, m, d) {
       const panel = document.getElementById('cal-event-panel');
       const key   = getEventKey(y, m, d);
-      const evs   = EVENTS[key];
+      const SRC   = window._dynamicEvents || EVENTS;
+      const evs   = SRC[key];
 
       const dateStr = `${d} ${MONTHS_TR[m]} ${y}`;
       let html = `<div class="cal-event-panel-date">📅 ${dateStr}</div>`;
@@ -1493,11 +1504,11 @@ else { initApp(); }
       const alanLabel= {yazilim:'Yazılım',  'yapay-zeka':'Yapay Zeka', donanim:'Donanım / Elektronik', tasarim:'Tasarım', siber:'Siber Güvenlik', mekanik:'Mekanik'}[alan] || alan;
 
       const skills = Array.from(card.querySelectorAll('.profil-skill')).map(s => s.textContent.trim());
-      const skillHTML = skills.map(s => `<span class="pdm-skill">${s}</span>`).join('');
+      const skillHTML = skills.map(s => `<span class="pdm-skill">${escapeHtml(s)}</span>`).join('');
 
       const avatarHTML = avatarSrc
-        ? `<div class="pdm-avatar"><img src="${avatarSrc}" alt="${name}"></div>`
-        : `<div class="pdm-avatar" style="background:${color};">${initials}</div>`;
+        ? `<div class="pdm-avatar"><img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(name)}"></div>`
+        : `<div class="pdm-avatar" style="background:${color};">${escapeHtml(initials)}</div>`;
 
       const overlay = document.getElementById('profil-detail-overlay');
       overlay.innerHTML = `
@@ -1509,12 +1520,12 @@ else { initApp(); }
           <div class="pdm-body">
             <div class="pdm-header">
               <div>
-                <div class="pdm-name">${name}</div>
-                <div class="pdm-uni">${uni}</div>
+                <div class="pdm-name">${escapeHtml(name)}</div>
+                <div class="pdm-uni">${escapeHtml(uni)}</div>
               </div>
               <div class="pdm-available-badge">Müsait</div>
             </div>
-            <div class="pdm-bio">${bio || '<span style="color:var(--text-dim);font-style:italic;">Biyografi eklenmemiş.</span>'}</div>
+            <div class="pdm-bio">${escapeHtml(bio) || '<span style="color:var(--text-dim);font-style:italic;">Biyografi eklenmemiş.</span>'}</div>
             ${skills.length ? `
             <div class="pdm-section-title">Beceriler & Uzmanlıklar</div>
             <div class="pdm-skills">${skillHTML}</div>` : ''}
@@ -1522,18 +1533,18 @@ else { initApp(); }
             <div class="pdm-info-grid">
               <div class="pdm-info-chip">
                 <div class="chip-icon">📍</div>
-                <div><div class="chip-label">Şehir</div><div class="chip-val">${sehirRaw.replace('📍','').trim() || '—'}</div></div>
+                <div><div class="chip-label">Şehir</div><div class="chip-val">${escapeHtml(sehirRaw.replace('📍','').trim()) || '—'}</div></div>
               </div>
               <div class="pdm-info-chip">
                 <div class="chip-icon">⏰</div>
-                <div><div class="chip-label">Haftalık Süre</div><div class="chip-val">${saat || '—'}</div></div>
+                <div><div class="chip-label">Haftalık Süre</div><div class="chip-val">${escapeHtml(saat) || '—'}</div></div>
               </div>
               ${alanLabel ? `<div class="pdm-info-chip" style="grid-column:1/-1;">
                 <div class="chip-icon">🎯</div>
-                <div><div class="chip-label">Alan</div><div class="chip-val">${alanLabel}</div></div>
+                <div><div class="chip-label">Alan</div><div class="chip-val">${escapeHtml(alanLabel)}</div></div>
               </div>` : ''}
             </div>
-            ${iletisim ? `<button class="idm-apply-btn" id="pdm-contact-copy" onclick="copyContactInfo('${iletisim.replace(/'/g,"\\'")}')">
+            ${iletisim ? `<button class="idm-apply-btn" id="pdm-contact-copy" onclick="copyContactInfo(this.dataset.info)" data-info="${escapeHtml(iletisim)}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               İletişimi Kopyala
             </button>` : ''}
@@ -1604,7 +1615,7 @@ else { initApp(); }
       navigator.clipboard.writeText(text).then(() => showToast('📋 ' + msg)).catch(() => showToast('📋 ' + text));
     }
 
-    function copyContactInfo() {
+    function copyFormContact() {
       const ad    = document.getElementById('field-ad')?.value || '';
       const email = document.getElementById('field-email')?.value || '';
       const mesaj = document.getElementById('field-mesaj')?.value || '';
