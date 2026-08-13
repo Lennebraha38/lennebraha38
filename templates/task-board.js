@@ -267,7 +267,7 @@ function showAuthOverlay() {
     const tab = document.getElementById('tab-login');
     if (tab && typeof switchAuthTab === 'function') switchAuthTab('login');
   } else {
-    window.location.href = 'giris.php';
+    window.location.href = 'index.html';
   }
 }
 
@@ -533,4 +533,4 @@ async function initTaskBoard() {
   console.log('Gorev & Ekip sistemi hazir!');
 }
 
-// initTaskBoard is called via initPage on gorevler.php
+// initTaskBoard is called via initPage on gorevler.html

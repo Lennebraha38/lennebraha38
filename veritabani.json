@@ -1,0 +1,7 @@
+{
+  "status": "ok",
+  "app": "Quantro",
+  "version": "2.0.0",
+  "backend": "Supabase (dogrudan baglanti)",
+  "message": "Statik yayin - frontend dogrudan Supabase JS SDK uzerinden calisiyor."
+}

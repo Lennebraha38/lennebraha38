@@ -3262,82 +3262,98 @@
 
   </div>
 
-  <!-- ===== HERO ===== -->
-  <header class="hero">
-    <div class="floor-grid"></div>
-
-    <!-- floating 3D wireframe cubes -->
-    <div class="f-cube c1"><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div></div>
-    <div class="f-cube c2"><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div></div>
-    <div class="f-cube c3"><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div></div>
-    <div class="f-cube c4"><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div></div>
-
+  <section id="sss">
     <div class="container">
-      <div class="hero-layout">
+      <div class="section-header reveal">
+        <div class="badge-pill">SSS</div>
+        <h2>Sıkça Sorulan Sorular</h2>
+        <p>Aklındaki soruların cevapları burada — bulamazsan bize yaz</p>
+      </div>
+      <div class="sss-grid reveal">
 
-        <!-- LEFT: Visionary Text -->
-        <div class="hero-content reveal">
-          <div class="hero-eyebrow">YARIŞMA PLATFORMU</div>
-          <h1>
-            <span class="h1-l1">Fikir Senden,</span>
-            <span class="h1-l2">Takımını Bulması</span>
-            <span class="h1-l3">Bizden.</span>
-          </h1>
-          <p>Teknofest'ten ICPC'ye, TÜBİTAK'tan Kaggle'a — Türkiye'nin en yetenekli zihinleri burada buluşuyor. Ekibini kur, mentörünü seç, projenle dünyayı değiştir.</p>
-
-          <!-- Platform Nasıl Çalışır -->
-          <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:2.5rem;text-align:left;">
-            <div style="display:flex;align-items:flex-start;gap:0.85rem;">
-              <div style="width:32px;height:32px;min-width:32px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;">📋</div>
-              <div>
-                <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.1rem;">İlan Aç veya Keşfet</div>
-                <div style="font-size:0.8rem;color:var(--text-dim);">Aradığın rolü veya projeyi saniyeler içinde yayınla ya da mevcut ilanları filtrele.</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:flex-start;gap:0.85rem;">
-              <div style="width:32px;height:32px;min-width:32px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;">🤝</div>
-              <div>
-                <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.1rem;">Eşleş & İletişime Geç</div>
-                <div style="font-size:0.8rem;color:var(--text-dim);">Profilleri incele, başvur ve ortalama 48 saniyede eşleşme sağla.</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:flex-start;gap:0.85rem;">
-              <div style="width:32px;height:32px;min-width:32px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;">🏆</div>
-              <div>
-                <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.1rem;">Yarış & Kazan</div>
-                <div style="font-size:0.8rem;color:var(--text-dim);">Takımınla yarışmaya katıl, mentör desteği al, ödülünü topla.</div>
-              </div>
-            </div>
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>Platforma üye olmak ücretli mi?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>Hayır, Quantro tamamen ücretsizdir. İlan açmak, takım aramak, profil oluşturmak ve mentörlerle iletişime geçmek için herhangi bir ücret talep etmiyoruz. Platform, Türkiye'deki yarışma ekosistemini güçlendirme misyonuyla tamamen ücretsiz olarak sunulmaktadır.</p>
           </div>
-          <div class="hero-actions">
-            <a href="ilanlar.html" class="btn btn-primary">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              İlanları Keşfet
-            </a>
-            <a href="yarismalar.html" class="btn btn-secondary">
-              Yarışmaları Gör
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-
         </div>
 
-        <!-- RIGHT: 3D Sphere -->
-        <div class="hero-visual">
-          <div class="sphere-orbit"></div>
-          <div class="sphere-orbit"></div>
-          <div class="sphere-glow"></div>
-          <canvas id="v-sphere-canvas" width="500" height="500"></canvas>
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>Hangi yarışma kategorileri destekleniyor?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>Şu an Teknofest (İHA, Roket, YZ, Akıllı Ulaşım vb.), TÜBİTAK (2204-A, 2209-A/B, Olimpiyatlar), Yazılım & Algoritma (ACM-ICPC, Codeforces, LeetCode), Yapay Zeka & Veri (Kaggle), Siber Güvenlik (CTF) ve Tasarım & İnovasyon (Hackathon, UI/UX) kategorilerini destekliyoruz. Yeni platformlar sürekli eklenmektedir.</p>
+          </div>
+        </div>
+
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>Takım kurmak için ne yapmalıyım?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>İki yol var: İlk olarak "İlan Aç" butonuyla aradığın rolü, beceri setini ve yarışma kategorini belirterek ilan yayınlayabilirsin. İkinci olarak mevcut ilanları tarayarak sana uygun bir ekibe katılabilirsin. Ortalama eşleşme süresi 48 saatin altındadır.</p>
+          </div>
+        </div>
+
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>Daha önce hiç yarışmaya katılmadım, başlayabilir miyim?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>Kesinlikle! Platform her seviyeye açık. Deneyimli yarışmacılardan oluşan ekiplere katılarak hem öğrenebilir hem de katkı sağlayabilirsin. Profil oluştururken deneyim seviyeni belirtmen, sana uygun ekip önerilerini iyileştirir. Mentörlük talebi de açabilirsin.</p>
+          </div>
+        </div>
+
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>Mentör olmak veya mentör bulmak nasıl işliyor?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>İletişim formundan "Mentörlük Talebi" konusunu seçerek bize ulaşabilirsin. Geçmiş yarışma başarıları ve uzmanlık alanına göre seni uygun bir mentörle eşleştiriyoruz. Mentör olmak isteyenler de aynı form üzerinden başvurabilir — platform üzerinde kendinizi tanıtma imkânı sunuyoruz.</p>
+          </div>
+        </div>
+
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>İlan açtıktan sonra ne kadar sürede yanıt alırım?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>Bu tamamen ilanın içeriğine ve yarışma dönemine göre değişmekle birlikte, Teknofest ve TÜBİTAK başvuru dönemlerinde ilanlar genellikle 24–48 saat içinde başvuru alıyor. İlanına net bir açıklama, gerekli beceriler ve iletişim bilgisi eklersen dönüş süresi önemli ölçüde kısalıyor.</p>
+          </div>
+        </div>
+
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>Verilerim güvende mi?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>Platforma girdiğin bilgiler yalnızca eşleşme ve iletişim süreçleri için kullanılır, üçüncü taraflarla paylaşılmaz. İletişim formundaki mesajlar doğrudan şifreli bağlantı üzerinden gönderilir. Hesabını istediğin zaman Ayarlar menüsünden tamamen silebilirsin.</p>
+          </div>
+        </div>
+
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>Platforma nasıl katkı sağlayabilirim?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>En değerli katkı, platformu çevrene tavsiye etmen. Bunun yanı sıra yarışma deneyimlerini ve önerilerini iletişim formu üzerinden bizimle paylaşabilirsin. Yeni yarışma kategorisi önerisi, hata bildirimi veya iş birliği teklifleri için her zaman açığız.</p>
+          </div>
         </div>
 
       </div>
     </div>
-
-
-  </header>
-
-
-
+  </section>
 
   <!-- ===== FOOTER ===== -->
   <footer>
@@ -3756,7 +3772,7 @@
   </div>
 
 <script>
-// Home page - particle canvas, 3D sphere, custom cursor are in shared JS
+// SSS page - static content
 initPage = async function() {};
 </script>
 <?php include __DIR__ . "/templates/shared/shared-js.html"; ?>
