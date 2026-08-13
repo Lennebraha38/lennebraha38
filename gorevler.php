@@ -110,13 +110,29 @@
         <h3 style="font-size:1.1rem;font-weight:800;">✉️ Üye Davet Et</h3>
         <button onclick="closeModal('ekip-davet-modal')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;">✕</button>
       </div>
+      <div id="davet-form">
+        <input type="email" id="davet-email" class="form-control" placeholder="Üyenin e-posta adresi" style="margin-bottom:0.8rem;width:100%;">
+        <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1.2rem;">
+          ✅ Davet linki oluşturulur ve e-posta taslağın açılır — <strong>Gönder</strong>'e bastığında üyenin mailine ulaşır.<br>
+          🔗 Üye linke tıklayıp aynı e-postayla giriş yaparsa ekibe katılır.<br>
+          📱 E-posta programın açılmıyorsa linki <strong>Kopyala</strong> ile alıp elle gönderebilirsin.
+        </p>
+        <button class="btn btn-primary" style="width:100%;" onclick="sendDavet()">Daveti Oluştur</button>
+      </div>
+      <div id="davet-sonuc" style="display:none;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">✅</div>
+        <h4 style="font-weight:800;margin-bottom:0.4rem;">Davet oluşturuldu!</h4>
+        <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.8rem;">Bu linki üyene gönder — sadece davet ettiğin e-posta ile çalışır:</p>
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;">
+          <input type="text" id="davet-link" readonly style="flex:1;padding:0.6rem 0.8rem;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-surface);color:var(--text);font-size:0.75rem;">
+          <button class="btn btn-primary btn-sm" onclick="kopyalaDavetLinki()" style="white-space:nowrap;">📋 Kopyala</button>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="acMailto()">✉️ E-posta taslağı</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="yeniDavet()">+ Yeni Davet</button>
+        </div>
+      </div>
       <input type="hidden" id="davet-ekip-id">
-      <input type="email" id="davet-email" class="form-control" placeholder="Üyenin e-posta adresi" style="margin-bottom:0.8rem;width:100%;">
-      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1.2rem;">
-        ✅ Davet linki oluşturulur ve e-posta taslağın açılır — <strong>Gönder</strong>'e bastığında üyenin mailine ulaşır.<br>
-        🔗 Üye linke tıklayıp aynı e-postayla giriş yaparsa ekibe katılır.
-      </p>
-      <button class="btn btn-primary" style="width:100%;" onclick="sendDavet()">Daveti Oluştur &amp; Gönder</button>
     </div>
   </div>
 

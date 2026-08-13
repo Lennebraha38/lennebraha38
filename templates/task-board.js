@@ -131,12 +131,42 @@ function openEkipDetail(ekipId) {
       `).join('')}
       ${uyeler.length === 0 ? '<div style="color:var(--text-dim);font-size:0.85rem;">Henüz üye yok. Üyeleri davet etmeye başla!</div>' : ''}
     </div>
+    ${lider ? '<div style="margin:1rem 0 0.5rem;font-size:0.8rem;font-weight:700;color:var(--text-dim);" id="davetler-baslik">BEKLEYEN DAVETLER</div><div id="ekip-davetler-listesi" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"><div style="color:var(--text-dim);font-size:0.85rem;">Yükleniyor...</div></div>' : ''}
     <div class="gd-actions">
       ${lider ? `<button class="btn btn-primary" style="flex:1" onclick="closeModal('ekip-detay-modal');openDavetModal(${e.id})">✉️ Üye Davet Et</button>` : ''}
       <button class="btn btn-ghost" style="flex:1" onclick="filterByEkip(${e.id});closeModal('ekip-detay-modal')">Görevleri Gör</button>
     </div>
   `;
   modal.classList.add('open');
+  if (lider) renderEkipDavetleri(e.id);
+}
+
+async function renderEkipDavetleri(ekipId) {
+  const liste = document.getElementById('ekip-davetler-listesi');
+  const baslik = document.getElementById('davetler-baslik');
+  if (!liste) return;
+  const { data, error } = await supabase.from('ekip_davetleri')
+    .select('email, durum, token')
+    .eq('ekip_id', ekipId)
+    .order('olusturulma_tarihi', { ascending: false });
+  if (error) { liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Davetler yüklenemedi.</div>'; return; }
+  const bekleyen = (data || []).filter(d => d.durum === 'bekliyor');
+  if (!bekleyen.length) { liste.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Bekleyen davet yok.</div>'; if (baslik) baslik.style.display = 'none'; return; }
+  if (baslik) baslik.style.display = '';
+  liste.innerHTML = bekleyen.map(d => `
+    <div class="ekip-detay-uye">
+      <span class="ekip-avatar">✉️</span>
+      <span style="flex:1">${escapeHtml(d.email)}</span>
+      <span class="ekip-rol">Bekliyor</span>
+      <button class="btn btn-ghost btn-sm" title="Linki kopyala" onclick="event.stopPropagation();kopyalaDavetLinkiBasit('${window.location.origin + window.location.pathname}?davet=${d.token}')">📋</button>
+    </div>
+  `).join('');
+}
+
+function kopyalaDavetLinkiBasit(link) {
+  const done = () => showToast('📋 Davet linki kopyalandı!');
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
+  else fallbackCopy(link, done);
 }
 
 function openDavetModal(ekipId) {
@@ -146,7 +176,43 @@ function openDavetModal(ekipId) {
   if (davetEkipId) davetEkipId.value = ekipId;
   const input = document.getElementById('davet-email');
   if (input) input.value = '';
+  const form = document.getElementById('davet-form');
+  const sonuc = document.getElementById('davet-sonuc');
+  if (form) form.style.display = '';
+  if (sonuc) sonuc.style.display = 'none';
   modal.classList.add('open');
+}
+
+let davetMailtoUrl = null;
+
+function kopyalaDavetLinki() {
+  const link = document.getElementById('davet-link')?.value;
+  if (!link) return;
+  const done = () => showToast('📋 Davet linki kopyalandı!');
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
+  } else fallbackCopy(link, done);
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  ta.remove();
+  done();
+}
+function acMailto() {
+  if (davetMailtoUrl) window.open(davetMailtoUrl, '_blank');
+}
+function yeniDavet() {
+  const form = document.getElementById('davet-form');
+  const sonuc = document.getElementById('davet-sonuc');
+  const input = document.getElementById('davet-email');
+  if (form) form.style.display = '';
+  if (sonuc) sonuc.style.display = 'none';
+  if (input) { input.value = ''; input.focus(); }
 }
 
 async function sendDavet() {
@@ -186,10 +252,17 @@ async function sendDavet() {
   const body = encodeURIComponent(
     `Merhaba,\n\n"${ekip.isim}" takımına davet edildin!\n\nEkibe katılmak için aşağıdaki linke tıkla:\n${link}\n\nBu link sadece senin e-postan için geçerlidir.\n\n— ${session.user.email}`
   );
-  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  davetMailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
 
-  closeModal('ekip-davet-modal');
-  showToast('Davet oluşturuldu — e-posta taslağı açıldı, Gönder\'e bas!');
+  // Sonuc ekranini goster: link gorunur + kopyalanabilir
+  const form = document.getElementById('davet-form');
+  const sonuc = document.getElementById('davet-sonuc');
+  const linkEl = document.getElementById('davet-link');
+  if (form) form.style.display = 'none';
+  if (sonuc) sonuc.style.display = 'block';
+  if (linkEl) linkEl.value = link;
+
+  showToast('Davet oluşturuldu — linki üyene gönder!');
 }
 
 // ===== DAVET KABUL AKISI =====
