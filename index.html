@@ -3767,7 +3767,10 @@ initPage = async function() {};
 
 const SUPABASE_URL = 'https://shvdsyclykgflyzgpdsi.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNodmRzeWNseWtnZmx5emdwZHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NzU2NjMsImV4cCI6MjA5NjI1MTY2M30.aO9yuXS8uH5YFwYumWIWsjBikQ0SHQJ0n3mGMl7GGXU';
-let supabase;
+// supabase UMD script'i 'var supabase' globali tanimlar — burada yeniden
+// 'let supabase' TANIMLANAMAZ (SyntaxError: already been declared).
+// 'var' yeniden tanimlamaya izin verir; initSupabase() window.supabase'i kullanir.
+var supabase;
 
 function escapeHtml(str) {
   return String(str == null ? '' : str)
@@ -4684,6 +4687,7 @@ else { initApp(); }
     function renderCalendar() {
       const title = document.getElementById('cal-title');
       const grid  = document.getElementById('cal-days');
+      if (!title || !grid) return; // takvim yalnizca takvim.html sayfasinda var
       title.textContent = `${MONTHS_TR[calMonth]} ${calYear}`;
       grid.innerHTML = '';
 
