@@ -25,12 +25,24 @@ CREATE INDEX IF NOT EXISTS ekip_davetleri_token_idx ON ekip_davetleri (token);
 ALTER TABLE ekip_davetleri ENABLE ROW LEVEL SECURITY;
 
 -- 2. RLS — EKIPLER (gizli: lider veya uye)
+-- NOT: Duzeyler arasi RLS sonsuz dongusunu onlemek icin uyelik kontrolu
+-- SECURITY DEFINER fonksiyonu ile yapilir (RLS'yi baypas eder, dongu yok).
+CREATE OR REPLACE FUNCTION public.ekip_uyesi_mi(p_ekip_id INT)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (SELECT 1 FROM ekip_uyeleri WHERE ekip_id = p_ekip_id AND kullanici_id = auth.uid());
+$$;
+
 DROP POLICY IF EXISTS "public_read_ekipler" ON ekipler;
 DROP POLICY IF EXISTS "member_read_ekipler" ON ekipler;
 CREATE POLICY "member_read_ekipler" ON ekipler FOR SELECT USING (
   auth.role() = 'authenticated' AND (
     olusturan_id = auth.uid()
-    OR EXISTS (SELECT 1 FROM ekip_uyeleri u WHERE u.ekip_id = ekipler.id AND u.kullanici_id = auth.uid())
+    OR public.ekip_uyesi_mi(id)
   )
 );
 
