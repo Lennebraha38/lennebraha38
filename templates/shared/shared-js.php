@@ -91,7 +91,7 @@ async function loadIlanlar() {
 
 function createIlanCardElement(ilan, currentUserEmail) {
   const isOwner = currentUserEmail && ilan.kullanici_email === currentUserEmail;
-  const badgeClass = ilan.durum === 'Açık' ? 'badge-success' : 'badge-warn';
+  const badgeClass = { 'Açık': 'badge-success', 'Yeni': 'badge-yeni', 'Son Gün': 'badge-warn' }[ilan.durum] || 'badge-warn';
   const tipEmoji = ilan.emoji || { 'takim': '🤝', 'proje': '🚀', 'mentor': '🎓' }[ilan.ilan_tipi] || '📌';
   const card = document.createElement('div');
   card.className = 'ilan-card';
@@ -103,8 +103,8 @@ function createIlanCardElement(ilan, currentUserEmail) {
   card.dataset.badgeClass = badgeClass; card.dataset.owner = isOwner ? 'true' : 'false';
   card.dataset.tags = (ilan.kategori||'') + ' ' + (ilan.sehir||'') + ' ' + (ilan.etiketler||'');
   card.dataset.id = ilan.id;
-  card.setAttribute('onmousemove', 'handle3DCard(event, this)');
-  card.setAttribute('onmouseleave', 'reset3DCard(this)');
+  card.setAttribute('onmousemove', 'tiltCard(event, this)');
+  card.setAttribute('onmouseleave', 'resetTilt(this)');
   card.setAttribute('onclick', 'openIlanDetail(this)');
   const tags = (ilan.etiketler || '').split(',').filter(Boolean).map(t => '<span class="ilan-tag">'+escapeHtml(t.trim())+'</span>').join('');
   card.innerHTML = '<div class="ilan-badge '+badgeClass+'">'+(ilan.durum||'Açık')+'</div>'+
@@ -121,7 +121,7 @@ async function supabaseCreateIlan(fd) {
   const session = (await supabase.auth.getSession()).data.session;
   const { data, error } = await supabase.from('ilanlar').insert({
     baslik: fd.baslik, aciklama: fd.aciklama, kategori: fd.kategori, sehir: fd.sehir,
-    etiketler: fd.etiketler, kisi: fd.kisi, ilan_tipi: fd.tip, durum: 'Açık',
+    etiketler: fd.etiketler, kisi: fd.kisi, ilan_tipi: fd.tip, durum: fd.durum || 'Açık',
     emoji: fd.tipEmoji, kullanici_email: session?.user?.email || '', iletisim_email: fd.iletisim
   }).select().single();
   if (error) { console.error(error.message); if (typeof showToast==='function') showToast('⚠️ İlan oluşturulamadı!'); return null; }
@@ -143,9 +143,13 @@ function overrideIlanFunctions() {
     const kisi = document.getElementById('if-kisi')?.value?.trim() || '1 Kişi';
     const iletisim = document.getElementById('if-iletisim')?.value?.trim() || '';
     if (!baslik || !kategori || !aciklama) { if (typeof showToast==='function') showToast('⚠️ Zorunlu alanları doldurun!'); return; }
-    const tipLabel = document.querySelector('.ilan-tabs .tab.active')?.textContent?.trim() || 'takim';
-    const tipEmoji = { 'takim': '🤝', 'proje': '🚀', 'mentor': '🎓' }[tipLabel] || '📌';
-    const r = await supabaseCreateIlan({ baslik, aciklama, kategori, sehir, etiketler, kisi, tip: tipLabel, tipEmoji, iletisim });
+    const session = (await supabase.auth.getSession()).data.session;
+    if (!session) { if (typeof showToast==='function') showToast('⚠️ İlan yayınlamak için önce giriş yapmalısın!'); return; }
+    const tipKey = window._ilanTip || 'takim';
+    const tipLabel = { 'takim': 'Takım Üyesi', 'mentor': 'Mentör', 'ortak': 'Proje Ortağı' }[tipKey] || 'Takım Üyesi';
+    const tipEmoji = { 'takim': '🤝', 'mentor': '🎓', 'ortak': '🚀' }[tipKey] || '📌';
+    const durumLabel = { 'yeni': 'Yeni', 'acik': 'Açık', 'yakin': 'Son Gün' }[kategori] || 'Açık';
+    const r = await supabaseCreateIlan({ baslik, aciklama, kategori, sehir, etiketler, kisi, tip: tipLabel, tipEmoji, iletisim, durum: durumLabel });
     if (r) {
       await loadIlanlar();
       ['if-baslik','if-aciklama','if-etiketler','if-kisi','if-iletisim'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -203,7 +207,7 @@ function createProfilCardElement(p) {
 let _currentAvatarFile = null;
 window.handleAvatarUpload = function(input) {
   if (input.files && input.files[0]) {
-    _currentAvatarFile = input.files[0];
+    window._pfAvatarFile = input.files[0];
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = document.getElementById('avatar-preview');
@@ -244,6 +248,23 @@ async function supabaseCreateProfil(fd, avatarFile) {
 
 async function supabaseDeleteProfil(id) { const { error } = await supabase.from('profiller').delete().eq('id',id); return !error; }
 
+async function supabaseUpdateProfil(id, fd, avatarFile) {
+  const session = (await supabase.auth.getSession()).data.session;
+  let avatarUrl = fd.avatar_url || '';
+  if (avatarFile) {
+    const ext = avatarFile.name.split('.').pop();
+    const fn = (session?.user?.id||'anon')+'_'+Date.now()+'.'+ext;
+    const { error: upErr } = await supabase.storage.from('avatarlar').upload(fn, avatarFile);
+    if (!upErr) { const { data: urlData } = supabase.storage.from('avatarlar').getPublicUrl(fn); avatarUrl = urlData?.publicUrl || ''; }
+  }
+  const { error } = await supabase.from('profiller').update({
+    isim: fd.isim, bio: fd.bio, yetenekler: fd.yetenekler, sehir: fd.sehir,
+    avatar_url: avatarUrl, iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat
+  }).eq('id', id);
+  if (error) { console.error(error.message); if (typeof showToast==='function') showToast('⚠️ Profil güncellenemedi!'); return null; }
+  return { id };
+}
+
 function overrideProfilFunctions() {
   window.submitProfilForm = async function() {
     const ad = document.getElementById('pf-ad')?.value?.trim();
@@ -257,8 +278,20 @@ function overrideProfilFunctions() {
     const saat = document.getElementById('pf-saat')?.value;
     const isim = ad+' '+soyad;
     if (!ad || !soyad || !bio || !skills || !iletisim) { if (typeof showToast==='function') showToast('⚠️ Zorunlu alanları doldurun!'); return; }
-    const r = await supabaseCreateProfil({ isim, bio, yetenekler: skills, sehir, iletisim, universite: uni, alan, saat: saat||'Esnek' }, _currentAvatarFile);
-    if (r) { _currentAvatarFile = null; await loadProfiller(); if (typeof closeProfilForm==='function') closeProfilForm(); if (typeof showToast==='function') showToast('✅ '+isim+' profili eklendi!'); }
+    const session = (await supabase.auth.getSession()).data.session;
+    if (!session) { if (typeof showToast==='function') showToast('⚠️ Profil eklemek için önce giriş yapmalısın!'); return; }
+    const editId = window._editProfilId || null;
+    const avatarFile = window._pfAvatarFile || null;
+    const r = editId
+      ? await supabaseUpdateProfil(editId, { isim, bio, yetenekler: skills, sehir, iletisim, universite: uni, alan, saat: saat||'Esnek', avatar_url: (document.getElementById('avatar-preview')?.src || '') }, avatarFile)
+      : await supabaseCreateProfil({ isim, bio, yetenekler: skills, sehir, iletisim, universite: uni, alan, saat: saat||'Esnek' }, avatarFile);
+    if (r) {
+      window._pfAvatarFile = null;
+      window._editProfilId = null;
+      await loadProfiller();
+      if (typeof closeProfilForm==='function') closeProfilForm();
+      if (typeof showToast==='function') showToast('✅ '+isim+' profili ' + (editId ? 'güncellendi!' : 'eklendi!'));
+    }
   };
   window.deleteProfilCard = async function(btn) {
     const card = btn.closest('.profil-card');
@@ -371,8 +404,6 @@ async function initApp() {
 
 if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); }
 else { initApp(); }
-  </script>
-
   </script>
 
   <script>
@@ -1252,6 +1283,7 @@ else { initApp(); }
       if (file.size > 5 * 1024 * 1024) {
         showToast('❗ Fotoğraf 5 MB\'dan küçük olmalı.'); return;
       }
+      window._pfAvatarFile = file;
       const reader = new FileReader();
       reader.onload = function(e) {
         currentAvatarDataUrl = e.target.result;
@@ -1267,6 +1299,7 @@ else { initApp(); }
 
     function openProfilForm() {
       // Reset avatar state
+      window._editProfilId = null;
       currentAvatarDataUrl = null;
       const img = document.getElementById('avatar-preview');
       const placeholder = document.getElementById('avatar-placeholder');
@@ -1396,6 +1429,7 @@ else { initApp(); }
       const card = btn.closest('.profil-card');
       // Form'u aç ve mevcut değerleri doldur
       openProfilForm();
+      window._editProfilId = parseInt(card.dataset.id) || null;
       setTimeout(() => {
         const bioEl   = card.querySelector('.profil-bio');
         const nameEl  = card.querySelector('.profil-info-name');
@@ -1499,6 +1533,10 @@ else { initApp(); }
                 <div><div class="chip-label">Alan</div><div class="chip-val">${alanLabel}</div></div>
               </div>` : ''}
             </div>
+            ${iletisim ? `<button class="idm-apply-btn" id="pdm-contact-copy" onclick="copyContactInfo('${iletisim.replace(/'/g,"\\'")}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              İletişimi Kopyala
+            </button>` : ''}
 
           </div>
         </div>`;
@@ -1609,6 +1647,7 @@ else { initApp(); }
 
     function setIlanTab(tab) {
       ilanTip = tab;
+      window._ilanTip = tab;
       ['takim','mentor','ortak'].forEach(t => {
         const btn = document.getElementById('ilan-tab-' + t);
         if (t === tab) {
@@ -2118,6 +2157,4 @@ else { initApp(); }
       const canvas = document.getElementById('v-bg-canvas');
       if (canvas) canvas.style.opacity = on ? '.65' : '0';
     }
-  </script>
-
   </script>

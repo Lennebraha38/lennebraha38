@@ -153,6 +153,8 @@ function renderKanbanBoard() {
     const el = document.getElementById(col.id);
     if (!el) return;
     const gorevler = allGorevler.filter(g => g.durum === durum);
+    const countEl = document.getElementById('count-' + durum);
+    if (countEl) countEl.textContent = gorevler.length;
     el.innerHTML = gorevler.map(g => `
       <div class="gorev-card" draggable="true" data-id="${g.id}"
            ondragstart="dragStart(event)" ondragend="dragEnd(event)"

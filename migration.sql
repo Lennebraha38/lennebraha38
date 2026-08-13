@@ -3,6 +3,19 @@
 -- Bu SQL'i Supabase SQL Editor'da calistirin
 -- ============================================
 
+-- 0. Temel ilanlar tablosu (yatirim duzeltmesi: eski projede mevcuttu,
+--    yeni projelerde de sorunsuz kurulum icin CREATE eklenir)
+CREATE TABLE IF NOT EXISTS ilanlar (
+  id SERIAL PRIMARY KEY,
+  baslik VARCHAR(255) NOT NULL,
+  aciklama TEXT,
+  kategori VARCHAR(50),
+  sehir VARCHAR(100),
+  etiketler VARCHAR(255),
+  kisi VARCHAR(50),
+  olusturulma_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 1. Mevcut ilanlar tablosuna ek sutunlar
 ALTER TABLE ilanlar ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'Acik';
 ALTER TABLE ilanlar ADD COLUMN IF NOT EXISTS iletisim_email VARCHAR(120);
@@ -109,6 +122,17 @@ CREATE POLICY "public_read_ilanlar" ON ilanlar FOR SELECT USING (true);
 CREATE POLICY "public_read_profiller" ON profiller FOR SELECT USING (true);
 CREATE POLICY "auth_insert_ilanlar" ON ilanlar FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 CREATE POLICY "auth_insert_profiller" ON profiller FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "owner_update_profiller" ON profiller FOR UPDATE USING (auth.role() = 'authenticated' AND user_id = auth.uid());
 CREATE POLICY "public_insert_mesajlar" ON mesajlar FOR INSERT WITH CHECK (true);
 CREATE POLICY "owner_delete_ilanlar" ON ilanlar FOR DELETE USING (auth.role() = 'authenticated' AND kullanici_email = auth.email());
 CREATE POLICY "owner_delete_profiller" ON profiller FOR DELETE USING (auth.role() = 'authenticated' AND user_id = auth.uid());
+
+-- 10. Avatar depolama (storage bucket + politikalar)
+INSERT INTO storage.buckets (id, name, public, file_size_limit)
+VALUES ('avatarlar', 'avatarlar', true, 5242880)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "public_read_avatarlar" ON storage.objects FOR SELECT USING (bucket_id = 'avatarlar');
+CREATE POLICY "auth_insert_avatarlar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatarlar' AND auth.role() = 'authenticated');
+CREATE POLICY "owner_update_avatarlar" ON storage.objects FOR UPDATE USING (bucket_id = 'avatarlar' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "owner_delete_avatarlar" ON storage.objects FOR DELETE USING (bucket_id = 'avatarlar' AND auth.uid()::text = (storage.foldername(name))[1]);

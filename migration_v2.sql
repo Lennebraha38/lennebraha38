@@ -83,3 +83,6 @@ CREATE POLICY "owner_delete_gorevler" ON gorevler FOR DELETE USING (auth.role() 
 ALTER PUBLICATION supabase_realtime ADD TABLE ekipler;
 ALTER PUBLICATION supabase_realtime ADD TABLE gorevler;
 ALTER PUBLICATION supabase_realtime ADD TABLE gorev_yorumlari;
+
+-- 6. Ayni kullanicinin ayni ekibe tekrar katilmasini engelle
+ALTER TABLE ekip_uyeleri ADD CONSTRAINT ekip_uyeleri_tekil UNIQUE (ekip_id, kullanici_email);
