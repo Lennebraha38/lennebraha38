@@ -110,8 +110,12 @@ INSERT INTO kategoriler (anahtar, emoji, baslik, alt_baslik, url, isim, aciklama
 ('siber', '🔐', 'Siber Guvenlik', 'CTF ve guvenlik arastirmalari 2026', 'https://ctftime.org', 'Web Guvenligi', 'XSS, SQLi, SSRF, OWASP Top 10', '🕸️', 'Acik', null);
 
 -- 8. Realtime etkinlestir
-ALTER PUBLICATION supabase_realtime ADD TABLE ilanlar;
-ALTER PUBLICATION supabase_realtime ADD TABLE profiller;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE ilanlar;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE profiller;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- 9. Row Level Security (temel politikalar)
 ALTER TABLE ilanlar ENABLE ROW LEVEL SECURITY;

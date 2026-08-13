@@ -80,9 +80,15 @@ CREATE POLICY "owner_update_gorevler" ON gorevler FOR UPDATE USING (auth.role() 
 CREATE POLICY "owner_delete_gorevler" ON gorevler FOR DELETE USING (auth.role() = 'authenticated' AND olusturan_id = auth.uid());
 
 -- Realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE ekipler;
-ALTER PUBLICATION supabase_realtime ADD TABLE gorevler;
-ALTER PUBLICATION supabase_realtime ADD TABLE gorev_yorumlari;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE ekipler;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE gorevler;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE gorev_yorumlari;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- 6. Ayni kullanicinin ayni ekibe tekrar katilmasini engelle
 ALTER TABLE ekip_uyeleri ADD CONSTRAINT ekip_uyeleri_tekil UNIQUE (ekip_id, kullanici_email);
