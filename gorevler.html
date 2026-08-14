@@ -2628,17 +2628,17 @@
       border-radius: 28px 28px 0 0;
     }
     .settings-header {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem;
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
     }
     .settings-header h3 { font-size: 1.3rem; font-weight: 800; }
-    .settings-section { margin-bottom: 1.1rem; }
+    .settings-section { margin-bottom: 0.8rem; }
     .settings-section-title {
       font-size: 0.72rem; font-weight: 700; color: var(--text-dim);
-      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;
     }
     .settings-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.6rem 1rem;
+      padding: 0.5rem 1rem;
       background: var(--bg-surface); border: 1px solid var(--border);
       border-radius: 12px; margin-bottom: 0.5rem;
     }
