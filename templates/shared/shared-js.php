@@ -1082,6 +1082,7 @@ else { initApp(); }
       let particles = [];
       const mouse = { x: -9999, y: -9999 };
       let running = true;
+      let lastPaint = 0;
 
       function resize(){
         W = canvas.width = window.innerWidth;
@@ -1106,6 +1107,10 @@ else { initApp(); }
 
       function draw(){
         if (!running) return;
+        requestAnimationFrame(draw);
+        const now = performance.now();
+        if (now - lastPaint < 33) return;
+        lastPaint = now;
         ctx.clearRect(0, 0, W, H);
         for(let i = 0; i < N; i++){
           const p = particles[i];
@@ -1130,7 +1135,6 @@ else { initApp(); }
           ctx.fillStyle = `rgba(59,130,246,${p.a})`; ctx.fill();
           p.update();
         }
-        requestAnimationFrame(draw);
       }
       document.addEventListener('visibilitychange', () => {
         running = !document.hidden;

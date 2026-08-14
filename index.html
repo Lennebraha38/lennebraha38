@@ -238,9 +238,9 @@
     }
 
     nav.scrolled {
-      background: rgba(10,22,40,0.9);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      background: rgba(10,22,40,0.92);
+      backdrop-filter: blur(12px) saturate(160%);
+      -webkit-backdrop-filter: blur(12px) saturate(160%);
       padding: 0.8rem 0;
       border-bottom: 1px solid var(--border);
       box-shadow: 0 4px 30px rgba(0,0,0,0.5);
@@ -4872,6 +4872,7 @@ else { initApp(); }
       let particles = [];
       const mouse = { x: -9999, y: -9999 };
       let running = true;
+      let lastPaint = 0;
 
       function resize(){
         W = canvas.width = window.innerWidth;
@@ -4896,6 +4897,10 @@ else { initApp(); }
 
       function draw(){
         if (!running) return;
+        requestAnimationFrame(draw);
+        const now = performance.now();
+        if (now - lastPaint < 33) return;
+        lastPaint = now;
         ctx.clearRect(0, 0, W, H);
         for(let i = 0; i < N; i++){
           const p = particles[i];
@@ -4920,7 +4925,6 @@ else { initApp(); }
           ctx.fillStyle = `rgba(59,130,246,${p.a})`; ctx.fill();
           p.update();
         }
-        requestAnimationFrame(draw);
       }
       document.addEventListener('visibilitychange', () => {
         running = !document.hidden;
