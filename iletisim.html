@@ -4977,14 +4977,14 @@ else { initApp(); }
         c.fillRect(0, 0, size, size);
         return s;
       }
-      const GLOW = makeGlow(20, 'rgba(175,205,255,0.28)');
+      const GLOW = makeGlow(20, 'rgba(175,205,255,0.38)');
       const CORES = ['210,225,255', '160,200,255', '140,220,255'];
 
       function resize(){
         W = canvas.width  = Math.ceil(window.innerWidth  * SCALE);
         H = canvas.height = Math.ceil(window.innerHeight * SCALE);
         ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
-        N = Math.max(8, Math.min(40, Math.round((window.innerWidth * window.innerHeight) / 25000)));
+        N = Math.max(10, Math.min(48, Math.round((window.innerWidth * window.innerHeight) / 20000)));
         particles = Array.from({length: N}, () => new Particle());
       }
 
@@ -4995,7 +4995,7 @@ else { initApp(); }
         this.r  = .4 + depth * .9;
         this.vx = (Math.random() - .5) * (.06 + depth * .12);
         this.vy = (Math.random() - .5) * (.06 + depth * .12);
-        this.a  = .12 + depth * .3;
+        this.a  = .16 + depth * .34;
         this.si = (Math.random() * 3) | 0;
         this.tw = .0008 + Math.random() * .004;
         this.tp = Math.random() * Math.PI * 2;
@@ -5014,7 +5014,7 @@ else { initApp(); }
           const p = particles[i];
           const tw = .7 + .3 * Math.sin(t * p.tw + p.tp);
           const alpha = Math.min(1, p.a * tw);
-          ctx.globalAlpha = alpha * .45;
+          ctx.globalAlpha = alpha * .55;
           ctx.drawImage(GLOW, p.x - GLOW.width/2, p.y - GLOW.height/2);
           ctx.globalAlpha = 1;
           ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
