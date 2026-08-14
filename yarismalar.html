@@ -5126,7 +5126,7 @@ else { initApp(); }
         if (!running) return;
         requestAnimationFrame(draw);
         const now = performance.now();
-        if (now - lastPaint < 33) return;
+        if (now - lastPaint < 41) return;
         lastPaint = now;
         t += 1;
         ctx.clearRect(0, 0, W, H);
