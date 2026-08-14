@@ -2612,7 +2612,7 @@
     .settings-card {
       background: var(--bg-card); border: 1px solid var(--border);
       border-radius: 28px; width: 100%; max-width: 480px;
-      padding: 2.2rem 2.4rem;
+      padding: 1.6rem 2rem;
       box-shadow: 0 40px 100px rgba(0,0,0,0.7);
       transform: scale(0.96) translateY(16px);
       transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
@@ -2628,17 +2628,17 @@
       border-radius: 28px 28px 0 0;
     }
     .settings-header {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.8rem;
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem;
     }
     .settings-header h3 { font-size: 1.3rem; font-weight: 800; }
-    .settings-section { margin-bottom: 1.5rem; }
+    .settings-section { margin-bottom: 1.1rem; }
     .settings-section-title {
       font-size: 0.72rem; font-weight: 700; color: var(--text-dim);
-      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem;
     }
     .settings-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 1rem;
       background: var(--bg-surface); border: 1px solid var(--border);
       border-radius: 12px; margin-bottom: 0.5rem;
     }
