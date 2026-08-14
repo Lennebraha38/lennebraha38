@@ -2616,7 +2616,10 @@
       box-shadow: 0 40px 100px rgba(0,0,0,0.7);
       transform: scale(0.96) translateY(16px);
       transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      position: relative; overflow: hidden;
+      position: relative;
+      max-height: 92vh; overflow-y: auto; overflow-x: hidden;
+      overscroll-behavior: contain;
+      scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
     }
     #settings-overlay.open .settings-card { transform: none; }
     .settings-card::before {
@@ -3421,21 +3424,21 @@
             <div class="settings-row-label">Yarışma Hatırlatıcıları</div>
             <div class="settings-row-sub">Son başvuru tarihlerinde bildirim al</div>
           </div>
-          <button class="settings-toggle on" onclick="this.classList.toggle('on')"></button>
+          <button class="settings-toggle on" id="n-yarisma" onclick="toggleAyar('n-yarisma')"></button>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Yeni İlan Bildirimleri</div>
             <div class="settings-row-sub">İlgi alanına uygun ilanlar gelince bildir</div>
           </div>
-          <button class="settings-toggle on" onclick="this.classList.toggle('on')"></button>
+          <button class="settings-toggle on" id="n-ilan" onclick="toggleAyar('n-ilan')"></button>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Takım Davet Bildirimleri</div>
             <div class="settings-row-sub">Sana takım daveti geldiğinde bildir</div>
           </div>
-          <button class="settings-toggle" onclick="this.classList.toggle('on')"></button>
+          <button class="settings-toggle" id="n-davet" onclick="toggleAyar('n-davet')"></button>
         </div>
       </div>
       <div class="settings-section">
@@ -3445,14 +3448,14 @@
             <div class="settings-row-label">Özel İmleç</div>
             <div class="settings-row-sub">Animasyonlu özel imleci etkinleştir</div>
           </div>
-          <button class="settings-toggle on" id="cursor-toggle" onclick="toggleCursorSetting(this)"></button>
+          <button class="settings-toggle on" id="cursor-toggle" onclick="toggleAyar('cursor-toggle')"></button>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Parçacık Arka Planı</div>
             <div class="settings-row-sub">Hareketli parçacık efektini göster</div>
           </div>
-          <button class="settings-toggle on" id="particle-toggle" onclick="toggleParticleSetting(this)"></button>
+          <button class="settings-toggle on" id="particle-toggle" onclick="toggleAyar('particle-toggle')"></button>
         </div>
       </div>
       <div class="settings-section">
@@ -3472,7 +3475,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 14.142A2 2 0 0 1 16.138 22H7.862a2 2 0 0 1-1.995-1.858L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>
         </div>
       </div>
-      <button class="btn btn-primary" style="width:100%" onclick="closeSettingsModal();showToast('✅ Ayarlar kaydedildi!')">Kaydet</button>
+      <button class="btn btn-primary" style="width:100%" onclick="kaydetAyarlar()">Kaydet</button>
     </div>
   </div>
 
@@ -6065,6 +6068,49 @@ else { initApp(); }
       const canvas = document.getElementById('v-bg-canvas');
       if (canvas) canvas.style.opacity = on ? '.65' : '0';
     }
+    function qtAyarlarOku() {
+      try { return JSON.parse(localStorage.getItem('quantro-ayarlar') || '{}'); } catch (e) { return {}; }
+    }
+    function qtAyarYaz(id, on) {
+      const a = qtAyarlarOku(); a[id] = on;
+      localStorage.setItem('quantro-ayarlar', JSON.stringify(a));
+    }
+    function uygulaAyarlar() {
+      const a = qtAyarlarOku();
+      ['n-yarisma', 'n-ilan', 'n-davet', 'cursor-toggle', 'particle-toggle'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && a[id] !== undefined) el.classList.toggle('on', !!a[id]);
+      });
+      const cur = document.getElementById('v-cursor');
+      const ring = document.getElementById('v-cursor-ring');
+      if (a['cursor-toggle'] === false) { if (cur) cur.style.display = 'none'; if (ring) ring.style.display = 'none'; }
+      const canvas = document.getElementById('v-bg-canvas');
+      if (canvas && a['particle-toggle'] === false) canvas.style.opacity = '0';
+    }
+    function toggleAyar(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('on');
+      qtAyarYaz(id, el.classList.contains('on'));
+      if (id === 'cursor-toggle' || id === 'particle-toggle') {
+        const cur = document.getElementById('v-cursor');
+        const ring = document.getElementById('v-cursor-ring');
+        const canvas = document.getElementById('v-bg-canvas');
+        const on = el.classList.contains('on');
+        if (id === 'cursor-toggle') { if (cur) cur.style.display = on ? '' : 'none'; if (ring) ring.style.display = on ? '' : 'none'; }
+        if (id === 'particle-toggle' && canvas) canvas.style.opacity = on ? '.65' : '0';
+      }
+    }
+    function kaydetAyarlar() {
+      ['n-yarisma', 'n-ilan', 'n-davet', 'cursor-toggle', 'particle-toggle'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) qtAyarYaz(id, el.classList.contains('on'));
+      });
+      uygulaAyarlar();
+      closeSettingsModal();
+      showToast('✅ Ayarlar kaydedildi!');
+    }
+    uygulaAyarlar();
   </script>
 
 </body></html>

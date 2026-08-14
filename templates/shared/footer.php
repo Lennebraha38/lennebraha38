@@ -45,21 +45,21 @@
             <div class="settings-row-label">Yarışma Hatırlatıcıları</div>
             <div class="settings-row-sub">Son başvuru tarihlerinde bildirim al</div>
           </div>
-          <button class="settings-toggle on" onclick="this.classList.toggle('on')"></button>
+          <button class="settings-toggle on" id="n-yarisma" onclick="toggleAyar('n-yarisma')"></button>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Yeni İlan Bildirimleri</div>
             <div class="settings-row-sub">İlgi alanına uygun ilanlar gelince bildir</div>
           </div>
-          <button class="settings-toggle on" onclick="this.classList.toggle('on')"></button>
+          <button class="settings-toggle on" id="n-ilan" onclick="toggleAyar('n-ilan')"></button>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Takım Davet Bildirimleri</div>
             <div class="settings-row-sub">Sana takım daveti geldiğinde bildir</div>
           </div>
-          <button class="settings-toggle" onclick="this.classList.toggle('on')"></button>
+          <button class="settings-toggle" id="n-davet" onclick="toggleAyar('n-davet')"></button>
         </div>
       </div>
       <div class="settings-section">
@@ -69,14 +69,14 @@
             <div class="settings-row-label">Özel İmleç</div>
             <div class="settings-row-sub">Animasyonlu özel imleci etkinleştir</div>
           </div>
-          <button class="settings-toggle on" id="cursor-toggle" onclick="toggleCursorSetting(this)"></button>
+          <button class="settings-toggle on" id="cursor-toggle" onclick="toggleAyar('cursor-toggle')"></button>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Parçacık Arka Planı</div>
             <div class="settings-row-sub">Hareketli parçacık efektini göster</div>
           </div>
-          <button class="settings-toggle on" id="particle-toggle" onclick="toggleParticleSetting(this)"></button>
+          <button class="settings-toggle on" id="particle-toggle" onclick="toggleAyar('particle-toggle')"></button>
         </div>
       </div>
       <div class="settings-section">
@@ -96,7 +96,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 14.142A2 2 0 0 1 16.138 22H7.862a2 2 0 0 1-1.995-1.858L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>
         </div>
       </div>
-      <button class="btn btn-primary" style="width:100%" onclick="closeSettingsModal();showToast('✅ Ayarlar kaydedildi!')">Kaydet</button>
+      <button class="btn btn-primary" style="width:100%" onclick="kaydetAyarlar()">Kaydet</button>
     </div>
   </div>
 

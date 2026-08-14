@@ -2269,4 +2269,47 @@ else { initApp(); }
       const canvas = document.getElementById('v-bg-canvas');
       if (canvas) canvas.style.opacity = on ? '.65' : '0';
     }
+    function qtAyarlarOku() {
+      try { return JSON.parse(localStorage.getItem('quantro-ayarlar') || '{}'); } catch (e) { return {}; }
+    }
+    function qtAyarYaz(id, on) {
+      const a = qtAyarlarOku(); a[id] = on;
+      localStorage.setItem('quantro-ayarlar', JSON.stringify(a));
+    }
+    function uygulaAyarlar() {
+      const a = qtAyarlarOku();
+      ['n-yarisma', 'n-ilan', 'n-davet', 'cursor-toggle', 'particle-toggle'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && a[id] !== undefined) el.classList.toggle('on', !!a[id]);
+      });
+      const cur = document.getElementById('v-cursor');
+      const ring = document.getElementById('v-cursor-ring');
+      if (a['cursor-toggle'] === false) { if (cur) cur.style.display = 'none'; if (ring) ring.style.display = 'none'; }
+      const canvas = document.getElementById('v-bg-canvas');
+      if (canvas && a['particle-toggle'] === false) canvas.style.opacity = '0';
+    }
+    function toggleAyar(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('on');
+      qtAyarYaz(id, el.classList.contains('on'));
+      if (id === 'cursor-toggle' || id === 'particle-toggle') {
+        const cur = document.getElementById('v-cursor');
+        const ring = document.getElementById('v-cursor-ring');
+        const canvas = document.getElementById('v-bg-canvas');
+        const on = el.classList.contains('on');
+        if (id === 'cursor-toggle') { if (cur) cur.style.display = on ? '' : 'none'; if (ring) ring.style.display = on ? '' : 'none'; }
+        if (id === 'particle-toggle' && canvas) canvas.style.opacity = on ? '.65' : '0';
+      }
+    }
+    function kaydetAyarlar() {
+      ['n-yarisma', 'n-ilan', 'n-davet', 'cursor-toggle', 'particle-toggle'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) qtAyarYaz(id, el.classList.contains('on'));
+      });
+      uygulaAyarlar();
+      closeSettingsModal();
+      showToast('✅ Ayarlar kaydedildi!');
+    }
+    uygulaAyarlar();
   </script>

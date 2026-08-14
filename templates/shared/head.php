@@ -2616,7 +2616,10 @@
       box-shadow: 0 40px 100px rgba(0,0,0,0.7);
       transform: scale(0.96) translateY(16px);
       transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      position: relative; overflow: hidden;
+      position: relative;
+      max-height: 92vh; overflow-y: auto; overflow-x: hidden;
+      overscroll-behavior: contain;
+      scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
     }
     #settings-overlay.open .settings-card { transform: none; }
     .settings-card::before {
