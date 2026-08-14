@@ -200,14 +200,14 @@
     .bg-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(120px);
       opacity: 0.2;
+      will-change: transform;
       animation: orbFloat 30s infinite alternate ease-in-out;
     }
 
-    .bg-orb-1 { width: 700px; height: 700px; top: -200px; right: -200px; background: radial-gradient(circle, #1E3A5F, transparent 70%); }
-    .bg-orb-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: radial-gradient(circle, #152238, transparent 70%); animation-delay: -10s; }
-    .bg-orb-3 { width: 400px; height: 400px; top: 50%; left: 40%; background: radial-gradient(circle, rgba(34,211,238,0.3), transparent 70%); animation-delay: -20s; opacity: 0.1; }
+    .bg-orb-1 { width: 700px; height: 700px; top: -200px; right: -200px; background: radial-gradient(circle, #1E3A5F, transparent 76%); }
+    .bg-orb-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: radial-gradient(circle, #152238, transparent 76%); animation-delay: -10s; }
+    .bg-orb-3 { width: 400px; height: 400px; top: 50%; left: 40%; background: radial-gradient(circle, rgba(34,211,238,0.3), transparent 76%); animation-delay: -20s; opacity: 0.1; }
     @media (max-width: 600px) { .bg-orb { display: none; } }
 
     @keyframes orbFloat {
@@ -428,7 +428,6 @@
       background: rgba(255,255,255,0.05);
       color: var(--text-main);
       border: 1px solid var(--border);
-      backdrop-filter: blur(8px);
     }
 
     .btn-secondary:hover {
@@ -2598,6 +2597,14 @@
     }
     .gac-next-btn:hover { background: #aecbfa; box-shadow: 0 2px 10px rgba(138,180,248,0.35); }
     .gac-next-btn:active { background: #8ab4f8; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
     /* ===== AYARLAR MODAL ===== */
     #settings-overlay {
@@ -4939,17 +4946,24 @@ else { initApp(); }
     ════════════════════════════════════════════════════════ */
     (function(){
       const canvas = document.getElementById('v-bg-canvas');
+      if (!canvas) return;
       const ctx    = canvas.getContext('2d');
-      let W, H;
-      const N = 75, LINK = 135;
+      let W, H, N;
+      const LINK2 = 135 * 135;
       let particles = [];
-      const mouse = { x: 0, y: 0 };
+      const mouse = { x: -9999, y: -9999 };
+      let running = true;
 
-      function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+      function resize(){
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+        N = Math.max(10, Math.min(75, Math.round((W * H) / 22000)));
+        particles = Array.from({length: N}, () => new Particle());
+      }
 
       function Particle(){
-        this.x  = Math.random() * W;
-        this.y  = Math.random() * H;
+        this.x  = Math.random() * (W || 100);
+        this.y  = Math.random() * (H || 100);
         this.vx = (Math.random() - .5) * .38;
         this.vy = (Math.random() - .5) * .38;
         this.r  = Math.random() * 1.4 + .5;
@@ -4961,26 +4975,25 @@ else { initApp(); }
         if(this.y < 0 || this.y > H) this.vy *= -1;
       };
 
-      function init(){ resize(); particles = Array.from({length:N}, ()=> new Particle()); }
-
       function draw(){
+        if (!running) return;
         ctx.clearRect(0, 0, W, H);
-        for(let i = 0; i < particles.length; i++){
+        for(let i = 0; i < N; i++){
           const p = particles[i];
-          for(let j = i+1; j < particles.length; j++){
+          for(let j = i+1; j < N; j++){
             const q  = particles[j];
             const dx = p.x-q.x, dy = p.y-q.y;
-            const d  = Math.sqrt(dx*dx+dy*dy);
-            if(d < LINK){
-              ctx.strokeStyle = `rgba(59,130,246,${(1-d/LINK)*.22})`;
+            const d2 = dx*dx+dy*dy;
+            if(d2 < LINK2){
+              ctx.strokeStyle = `rgba(59,130,246,${(1-d2/LINK2)*.22})`;
               ctx.lineWidth   = .55;
               ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
             }
           }
-          const dx = p.x-mouse.x, dy = p.y-mouse.y;
-          const d  = Math.sqrt(dx*dx+dy*dy);
-          if(d < 190){
-            ctx.strokeStyle = `rgba(6,182,212,${(1-d/190)*.38})`;
+          const mdx = p.x-mouse.x, mdy = p.y-mouse.y;
+          const md2 = mdx*mdx+mdy*mdy;
+          if(md2 < 190*190){
+            ctx.strokeStyle = `rgba(6,182,212,${(1-md2/(190*190))*.38})`;
             ctx.lineWidth   = .7;
             ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(mouse.x,mouse.y); ctx.stroke();
           }
@@ -4990,9 +5003,13 @@ else { initApp(); }
         }
         requestAnimationFrame(draw);
       }
+      document.addEventListener('visibilitychange', () => {
+        running = !document.hidden;
+        if (running) requestAnimationFrame(draw);
+      });
       window.addEventListener('resize', resize);
-      window.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
-      init(); draw();
+      window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+      resize(); draw();
     })();
 
     /* ════════════════════════════════════════════════════════
@@ -5067,19 +5084,24 @@ else { initApp(); }
         // equator highlight
         const ep=[];
         for(let j=0;j<=SEGS*2;j++) ep.push([Math.cos(j/(SEGS*2)*Math.PI*2),0,Math.sin(j/(SEGS*2)*Math.PI*2)]);
-        ctx.save(); ctx.shadowColor='rgba(6,182,212,.5)'; ctx.shadowBlur=8;
-        drawLine(ep,'rgba(6,182,212,.38)',1.2); ctx.restore();
+        drawLine(ep,'rgba(6,182,212,.38)',1.2);
       }
-      function loop(){
-        rotY += .0038 + mx*.0009;
-        rotX  = Math.max(-.5, Math.min(.8, rotX + my*.00025));
-        render(); requestAnimationFrame(loop);
+      let lastFrame = 0;
+      function loop(ts){
+        if (document.hidden) return;
+        if (ts - lastFrame >= 33) {
+          lastFrame = ts;
+          rotY += .0038 + mx*.0009;
+          rotX  = Math.max(-.5, Math.min(.8, rotX + my*.00025));
+          render();
+        }
+        requestAnimationFrame(loop);
       }
       window.addEventListener('mousemove', e=>{
         mx = (e.clientX/window.innerWidth -.5)*2;
         my = (e.clientY/window.innerHeight-.5)*2;
-      });
-      loop();
+      }, { passive: true });
+      requestAnimationFrame(loop);
     })();
 
     /* ════════════════════════════════════════════════════════
@@ -5101,6 +5123,7 @@ else { initApp(); }
 
       let lastTime = 0;
       let isHovering = false;
+      let wasHovering = null;
 
       document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
 
@@ -5132,16 +5155,20 @@ else { initApp(); }
         dot.style.transform  = `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
         ring.style.transform = `translate(calc(${rx}px - 50%), calc(${ry}px - 50%))`;
 
-        if (isHovering) {
-          dot.style.width = dot.style.height = '6px';
-          ring.style.width = ring.style.height = '54px';
-          ring.style.borderColor = 'rgba(6,182,212,.65)';
-          ring.style.borderWidth = '1.5px';
-        } else {
-          dot.style.width = dot.style.height = '12px';
-          ring.style.width = ring.style.height = '36px';
-          ring.style.borderColor = 'rgba(6,182,212,.35)';
-          ring.style.borderWidth = '1px';
+        // Sadece durum degistiginde stil yaz (her karede degil)
+        if (isHovering !== wasHovering) {
+          wasHovering = isHovering;
+          if (isHovering) {
+            dot.style.width = dot.style.height = '6px';
+            ring.style.width = ring.style.height = '54px';
+            ring.style.borderColor = 'rgba(6,182,212,.65)';
+            ring.style.borderWidth = '1.5px';
+          } else {
+            dot.style.width = dot.style.height = '12px';
+            ring.style.width = ring.style.height = '36px';
+            ring.style.borderColor = 'rgba(6,182,212,.35)';
+            ring.style.borderWidth = '1px';
+          }
         }
 
         requestAnimationFrame(loop);

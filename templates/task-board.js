@@ -783,16 +783,19 @@ function filterByEkip(ekipId) {
 function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); document.body.style.overflow = ''; }
 
-// Realtime subscription
+// Realtime subscription (debounce: hizli degisiklikler birikerek tek seferde yenilenir)
 function setupGorevRealtime() {
+  let gTimer = null, eTimer = null;
+  const debounce = (fn) => () => { clearTimeout(gTimer); gTimer = setTimeout(fn, 400); };
+  const debounceEkip = (fn) => () => { clearTimeout(eTimer); eTimer = setTimeout(fn, 400); };
   supabase.channel('gorevler-rt')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'gorevler' }, () => { loadGorevler(currentEkipFilter); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'gorevler' }, debounce(() => loadGorevler(currentEkipFilter)))
     .subscribe();
   supabase.channel('ekipler-rt')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'ekipler' }, () => { loadEkipler(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'ekipler' }, debounceEkip(() => loadEkipler()))
     .subscribe();
   supabase.channel('ekip_uyeleri-rt')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'ekip_uyeleri' }, () => { loadEkipler(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'ekip_uyeleri' }, debounceEkip(() => loadEkipler()))
     .subscribe();
 }
 

@@ -200,14 +200,14 @@
     .bg-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(120px);
       opacity: 0.2;
+      will-change: transform;
       animation: orbFloat 30s infinite alternate ease-in-out;
     }
 
-    .bg-orb-1 { width: 700px; height: 700px; top: -200px; right: -200px; background: radial-gradient(circle, #1E3A5F, transparent 70%); }
-    .bg-orb-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: radial-gradient(circle, #152238, transparent 70%); animation-delay: -10s; }
-    .bg-orb-3 { width: 400px; height: 400px; top: 50%; left: 40%; background: radial-gradient(circle, rgba(34,211,238,0.3), transparent 70%); animation-delay: -20s; opacity: 0.1; }
+    .bg-orb-1 { width: 700px; height: 700px; top: -200px; right: -200px; background: radial-gradient(circle, #1E3A5F, transparent 76%); }
+    .bg-orb-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; background: radial-gradient(circle, #152238, transparent 76%); animation-delay: -10s; }
+    .bg-orb-3 { width: 400px; height: 400px; top: 50%; left: 40%; background: radial-gradient(circle, rgba(34,211,238,0.3), transparent 76%); animation-delay: -20s; opacity: 0.1; }
     @media (max-width: 600px) { .bg-orb { display: none; } }
 
     @keyframes orbFloat {
@@ -428,7 +428,6 @@
       background: rgba(255,255,255,0.05);
       color: var(--text-main);
       border: 1px solid var(--border);
-      backdrop-filter: blur(8px);
     }
 
     .btn-secondary:hover {
@@ -2598,6 +2597,14 @@
     }
     .gac-next-btn:hover { background: #aecbfa; box-shadow: 0 2px 10px rgba(138,180,248,0.35); }
     .gac-next-btn:active { background: #8ab4f8; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
     /* ===== AYARLAR MODAL ===== */
     #settings-overlay {
