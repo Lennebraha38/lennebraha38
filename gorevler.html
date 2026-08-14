@@ -1467,7 +1467,7 @@
     #v-bg-canvas {
       position: fixed; inset: 0; z-index: -3;
       width: 100vw; height: 100vh;
-      pointer-events: none; opacity: .65;
+      pointer-events: none; opacity: .8;
     }
 
     /* ===== HERO 2-COLUMN LAYOUT ===== */
@@ -4948,33 +4948,56 @@ else { initApp(); }
       const canvas = document.getElementById('v-bg-canvas');
       if (!canvas) return;
       const ctx    = canvas.getContext('2d');
+      const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       let W, H, N;
-      const LINK2 = 135 * 135;
+      const LINK2 = 130 * 130;
+      const MOUSE2 = 90 * 90;
       let particles = [];
       const mouse = { x: -9999, y: -9999 };
       let running = true;
       let lastPaint = 0;
+      let t = 0;
+
+      // Glow sprite'lari tek sefer cizilir (her karede gradyan maliyeti yok)
+      function makeSprite(size, color){
+        const s = document.createElement('canvas');
+        s.width = s.height = size;
+        const c = s.getContext('2d');
+        const g = c.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+        g.addColorStop(0, color);
+        g.addColorStop(.55, color.replace(/[\d.]+\)$/, '.12)'));
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        c.fillStyle = g;
+        c.fillRect(0, 0, size, size);
+        return s;
+      }
+      const SPRITES = [
+        makeSprite(26, 'rgba(59,130,246,0.34)'),
+        makeSprite(30, 'rgba(6,182,212,0.32)'),
+        makeSprite(26, 'rgba(139,92,246,0.30)')
+      ];
+      const CORES = ['59,130,246', '6,182,212', '139,92,246'];
 
       function resize(){
-        W = canvas.width = Math.ceil(window.innerWidth / 2);
-        H = canvas.height = Math.ceil(window.innerHeight / 2);
-        N = Math.max(8, Math.min(45, Math.round((W * H) / 14000)));
+        W = canvas.width  = Math.ceil(window.innerWidth  * DPR);
+        H = canvas.height = Math.ceil(window.innerHeight * DPR);
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        N = Math.max(10, Math.min(52, Math.round((window.innerWidth * window.innerHeight) / 18000)));
         particles = Array.from({length: N}, () => new Particle());
       }
 
       function Particle(){
-        this.x  = Math.random() * (W || 100);
-        this.y  = Math.random() * (H || 100);
-        this.vx = (Math.random() - .5) * .38;
-        this.vy = (Math.random() - .5) * .38;
-        this.r  = Math.random() * 1.4 + .5;
-        this.a  = Math.random() * .45 + .18;
+        const depth = Math.random();
+        this.x  = Math.random() * (W / DPR || 100);
+        this.y  = Math.random() * (H / DPR || 100);
+        this.r  = 1 + depth * 1.6;
+        this.vx = (Math.random() - .5) * (.14 + depth * .3);
+        this.vy = (Math.random() - .5) * (.14 + depth * .3);
+        this.a  = .25 + depth * .42;
+        this.si = (Math.random() * 3) | 0;
+        this.tw = .0012 + Math.random() * .003;
+        this.tp = Math.random() * Math.PI * 2;
       }
-      Particle.prototype.update = function(){
-        this.x += this.vx; this.y += this.vy;
-        if(this.x < 0 || this.x > W) this.vx *= -1;
-        if(this.y < 0 || this.y > H) this.vy *= -1;
-      };
 
       function draw(){
         if (!running) return;
@@ -4982,29 +5005,57 @@ else { initApp(); }
         const now = performance.now();
         if (now - lastPaint < 33) return;
         lastPaint = now;
+        t += 1;
         ctx.clearRect(0, 0, W, H);
+
         for(let i = 0; i < N; i++){
           const p = particles[i];
+
+          // Fare itmesi (yumusak tepme)
+          const mdx = p.x - mouse.x, mdy = p.y - mouse.y;
+          const md2 = mdx*mdx + mdy*mdy;
+          if (md2 < MOUSE2 && md2 > .01){
+            const d = Math.sqrt(md2);
+            const f = (1 - d / 90) * .7;
+            p.x += (mdx / d) * f;
+            p.y += (mdy / d) * f;
+          }
+
+          // Baglanti cizgileri (sqrt'suz)
           for(let j = i+1; j < N; j++){
             const q  = particles[j];
             const dx = p.x-q.x, dy = p.y-q.y;
             const d2 = dx*dx+dy*dy;
             if(d2 < LINK2){
-              ctx.strokeStyle = `rgba(59,130,246,${(1-d2/LINK2)*.22})`;
-              ctx.lineWidth   = .55;
+              ctx.strokeStyle = `rgba(120,160,255,${(1-d2/LINK2)*.14})`;
+              ctx.lineWidth   = 1;
               ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
             }
           }
-          const mdx = p.x - mouse.x / 2, mdy = p.y - mouse.y / 2;
-          const md2 = mdx*mdx+mdy*mdy;
-          if(md2 < 190*190){
-            ctx.strokeStyle = `rgba(6,182,212,${(1-md2/(190*190))*.38})`;
-            ctx.lineWidth   = .7;
+
+          // Fare-yakinlik cizgisi
+          if(md2 < 160*160){
+            ctx.strokeStyle = `rgba(6,182,212,${(1-md2/(160*160))*.3})`;
+            ctx.lineWidth   = .8;
             ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(mouse.x,mouse.y); ctx.stroke();
           }
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          ctx.fillStyle = `rgba(59,130,246,${p.a})`; ctx.fill();
-          p.update();
+
+          // Parildama (twinkle) ile glow + cekirdek
+          const tw   = .72 + .28 * Math.sin(t * p.tw + p.tp);
+          const alpha = Math.min(1, p.a * tw);
+          const spr = SPRITES[p.si];
+          ctx.globalAlpha = alpha * .85;
+          ctx.drawImage(spr, p.x - spr.width/2, p.y - spr.height/2);
+          ctx.globalAlpha = 1;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fillStyle = `rgba(${CORES[p.si]},${alpha})`;
+          ctx.fill();
+
+          // Hareket (kenarda tasip geri gel)
+          p.x += p.vx; p.y += p.vy;
+          const M = 40;
+          if (p.x < -M) p.x = W/DPR + M; else if (p.x > W/DPR + M) p.x = -M;
+          if (p.y < -M) p.y = H/DPR + M; else if (p.y > H/DPR + M) p.y = -M;
         }
       }
       document.addEventListener('visibilitychange', () => {

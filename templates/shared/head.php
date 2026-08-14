@@ -1467,7 +1467,7 @@
     #v-bg-canvas {
       position: fixed; inset: 0; z-index: -3;
       width: 100vw; height: 100vh;
-      pointer-events: none; opacity: .65;
+      pointer-events: none; opacity: .8;
     }
 
     /* ===== HERO 2-COLUMN LAYOUT ===== */
