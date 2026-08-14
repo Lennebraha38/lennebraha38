@@ -118,6 +118,17 @@
 
   </div>
 
+  <script>
+  /* Sayfa gecislerinde giris ekrani flash'ini onle: oturum varsa overlay'i ilk boyamada gosterme */
+  try {
+    var k = Object.keys(localStorage).find(function(x) { return x.indexOf('sb-') === 0 && x.indexOf('-auth-token') > 0; });
+    if (k && (localStorage.getItem(k) || '').indexOf('access_token') > -1) {
+      var ao = document.getElementById('auth-overlay');
+      if (ao) ao.style.display = 'none';
+    }
+  } catch (e) {}
+  </script>
+
   <!-- PARTICLE CANVAS + CURSOR -->
   <canvas id="v-bg-canvas"></canvas>
   <div id="v-cursor"></div>

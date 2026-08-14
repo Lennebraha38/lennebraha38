@@ -28,16 +28,17 @@ function initSupabase() {
 
 async function initAuth() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) enterSiteWithUser(session.user);
+  if (session) enterSiteWithUser(session.user, true);
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) enterSiteWithUser(session.user);
     else if (event === 'SIGNED_OUT') exitSite();
   });
 }
 
-function enterSiteWithUser(user) {
+function enterSiteWithUser(user, instant) {
   const overlay = document.getElementById('auth-overlay');
-  if (overlay) { overlay.classList.add('hiding'); setTimeout(() => { overlay.style.display = 'none'; }, 500); }
+  if (instant && overlay) { overlay.style.display = 'none'; }
+  else if (overlay) { overlay.classList.add('hiding'); setTimeout(() => { overlay.style.display = 'none'; }, 500); }
   const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı';
   const initials = name.split(' ').map(p => p[0] || '').join('').toUpperCase().slice(0,2) || 'U';
   const firstName = name.split(' ')[0];
@@ -1085,9 +1086,9 @@ else { initApp(); }
       let lastPaint = 0;
 
       function resize(){
-        W = canvas.width = window.innerWidth;
-        H = canvas.height = window.innerHeight;
-        N = Math.max(10, Math.min(75, Math.round((W * H) / 22000)));
+        W = canvas.width = Math.ceil(window.innerWidth / 2);
+        H = canvas.height = Math.ceil(window.innerHeight / 2);
+        N = Math.max(8, Math.min(45, Math.round((W * H) / 14000)));
         particles = Array.from({length: N}, () => new Particle());
       }
 
@@ -1124,7 +1125,7 @@ else { initApp(); }
               ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
             }
           }
-          const mdx = p.x-mouse.x, mdy = p.y-mouse.y;
+          const mdx = p.x - mouse.x / 2, mdy = p.y - mouse.y / 2;
           const md2 = mdx*mdx+mdy*mdy;
           if(md2 < 190*190){
             ctx.strokeStyle = `rgba(6,182,212,${(1-md2/(190*190))*.38})`;
