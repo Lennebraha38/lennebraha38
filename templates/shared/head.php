@@ -159,7 +159,6 @@
     }
 
     html {
-      scroll-behavior: smooth;
       scrollbar-width: thin;
       scrollbar-color: var(--primary) var(--bg-deep);
     }
@@ -234,13 +233,11 @@
       width: 100%;
       z-index: 1000;
       padding: 1.4rem 0;
-      transition: var(--transition);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
     }
 
     nav.scrolled {
-      background: rgba(10,22,40,0.92);
-      backdrop-filter: blur(12px) saturate(160%);
-      -webkit-backdrop-filter: blur(12px) saturate(160%);
+      background: rgba(10,22,40,0.94);
       padding: 0.8rem 0;
       border-bottom: 1px solid var(--border);
       box-shadow: 0 4px 30px rgba(0,0,0,0.5);

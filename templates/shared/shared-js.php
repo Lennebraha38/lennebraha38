@@ -1140,6 +1140,12 @@ else { initApp(); }
         running = !document.hidden;
         if (running) requestAnimationFrame(draw);
       });
+      let scrollTimer = null;
+      window.addEventListener('scroll', () => {
+        if (running) { running = false; }
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => { running = true; requestAnimationFrame(draw); }, 120);
+      }, { passive: true });
       window.addEventListener('resize', resize);
       window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
       resize(); draw();
@@ -1220,8 +1226,12 @@ else { initApp(); }
         drawLine(ep,'rgba(6,182,212,.38)',1.2);
       }
       let lastFrame = 0;
+      let offscreen = false;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entries => { offscreen = !entries[0].isIntersecting; }).observe(canvas);
+      }
       function loop(ts){
-        if (document.hidden) return;
+        if (document.hidden || offscreen) return;
         if (ts - lastFrame >= 33) {
           lastFrame = ts;
           rotY += .0038 + mx*.0009;
