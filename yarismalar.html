@@ -1539,7 +1539,6 @@
     #v-sphere-canvas {
       display: block; width: 100%; max-width: 500px;
       position: relative; z-index: 2;
-      filter: drop-shadow(0 0 50px rgba(59,130,246,.18));
     }
     .sphere-glow {
       position: absolute; width: 60%; padding-top: 60%;
@@ -5071,7 +5070,7 @@ else { initApp(); }
       const canvas = document.getElementById('v-bg-canvas');
       if (!canvas) return;
       const ctx    = canvas.getContext('2d');
-      const DPR = Math.min(window.devicePixelRatio || 1, 2);
+      const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       let W, H, N;
       let particles = [];
       let running = true;
@@ -5208,7 +5207,7 @@ else { initApp(); }
         ctx.clearRect(0,0,W,H);
         // glow
         const g=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,190);
-        g.addColorStop(0,'rgba(59,130,246,.05)'); g.addColorStop(1,'transparent');
+        g.addColorStop(0,'rgba(59,130,246,.08)'); g.addColorStop(1,'transparent');
         ctx.beginPath(); ctx.arc(W/2,H/2,190,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
         // latitude
         for(let i=0;i<=RINGS;i++){
@@ -5250,11 +5249,17 @@ else { initApp(); }
       }
       let lastFrame = 0;
       let offscreen = false;
+      let loopActive = true;
+      function kickLoop(){ if (!loopActive) { loopActive = true; requestAnimationFrame(loop); } }
       if ('IntersectionObserver' in window) {
-        new IntersectionObserver(entries => { offscreen = !entries[0].isIntersecting; }).observe(canvas);
+        new IntersectionObserver(entries => {
+          offscreen = !entries[0].isIntersecting;
+          if (!offscreen) kickLoop();
+        }).observe(canvas);
       }
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) kickLoop(); });
       function loop(ts){
-        if (document.hidden || offscreen) return;
+        if (document.hidden || offscreen) { loopActive = false; return; }
         if (ts - lastFrame >= 33) {
           lastFrame = ts;
           rotY += .0038 + mx*.0009;
@@ -5291,20 +5296,29 @@ else { initApp(); }
       let isHovering = false;
       let wasHovering = null;
 
-      document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
+      document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; lastMove = performance.now(); if (!running) { running = true; requestAnimationFrame(loop); } }, { passive: true });
 
       document.addEventListener('mouseover', e => {
         if (e.target.closest('a,button,.card-link,.ilan-card,.card-3d,.profil-card,.nav-user-badge,.dropdown-item')) {
           isHovering = true;
+          if (!running) { running = true; requestAnimationFrame(loop); }
         }
       });
       document.addEventListener('mouseout', e => {
         if (e.target.closest('a,button,.card-link,.ilan-card,.card-3d,.profil-card,.nav-user-badge,.dropdown-item')) {
           isHovering = false;
+          if (!running) { running = true; requestAnimationFrame(loop); }
         }
       });
 
+      let running = true;
+      let lastMove = performance.now();
+      let hoverDirty = false;
+
       function loop(ts) {
+        // Fare 300ms'den uzun sure hareketsizse donguyu tamamen kapat
+        if (ts - lastMove > 300) { running = false; return; }
+
         const dt = Math.min((ts - lastTime) / 1000, 0.05); // cap at 50ms to avoid jumps
         lastTime = ts;
 
@@ -5317,13 +5331,17 @@ else { initApp(); }
         rx += (mx - rx) * rf;
         ry += (my - ry) * rf;
 
-        // Use transform instead of left/top for GPU acceleration
-        dot.style.transform  = `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
-        ring.style.transform = `translate(calc(${rx}px - 50%), calc(${ry}px - 50%))`;
+        // Yerlesme toleransina ulasildiysa stil yazmayi birak (kalem cekilmis gibi donuyor)
+        const settled = Math.abs(dx - mx) < .05 && Math.abs(dy - my) < .05 && Math.abs(rx - mx) < .3 && Math.abs(ry - my) < .3;
+        if (!settled || hoverDirty) {
+          dot.style.transform  = `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
+          ring.style.transform = `translate(calc(${rx}px - 50%), calc(${ry}px - 50%))`;
+        }
 
         // Sadece durum degistiginde stil yaz (her karede degil)
         if (isHovering !== wasHovering) {
           wasHovering = isHovering;
+          hoverDirty = true;
           if (isHovering) {
             dot.style.width = dot.style.height = '6px';
             ring.style.width = ring.style.height = '54px';
@@ -5335,6 +5353,8 @@ else { initApp(); }
             ring.style.borderColor = 'rgba(6,182,212,.35)';
             ring.style.borderWidth = '1px';
           }
+        } else {
+          hoverDirty = false;
         }
 
         requestAnimationFrame(loop);

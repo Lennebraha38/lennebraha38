@@ -1539,7 +1539,6 @@
     #v-sphere-canvas {
       display: block; width: 100%; max-width: 500px;
       position: relative; z-index: 2;
-      filter: drop-shadow(0 0 50px rgba(59,130,246,.18));
     }
     .sphere-glow {
       position: absolute; width: 60%; padding-top: 60%;
