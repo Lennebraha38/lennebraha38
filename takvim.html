@@ -4883,37 +4883,38 @@ else { initApp(); }
     /* ════════════════════════════════════════════════════════
        PARTICLE BACKGROUND CANVAS
     ════════════════════════════════════════════════════════ */
-    (function(){
+(function(){
       const canvas = document.getElementById('v-bg-canvas');
       if (!canvas) return;
       const ctx    = canvas.getContext('2d');
-      const SCALE = .75;
+      const DPR = Math.min(window.devicePixelRatio || 1, 2);
       let W, H, N;
       let particles = [];
       let running = true;
       let lastPaint = 0;
       let t = 0;
 
-      // Tek yumusak isik sprite'i (her karede gradyan yok)
       function makeGlow(size, color){
         const s = document.createElement('canvas');
         s.width = s.height = size;
         const c = s.getContext('2d');
         const g = c.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
         g.addColorStop(0, color);
+        g.addColorStop(.4, color.replace(/[\d.]+\)$/, '.10)'));
         g.addColorStop(1, 'rgba(0,0,0,0)');
         c.fillStyle = g;
         c.fillRect(0, 0, size, size);
         return s;
       }
-      const GLOW = makeGlow(20, 'rgba(175,205,255,0.38)');
-      const CORES = ['210,225,255', '160,200,255', '140,220,255'];
+      const GLOW = makeGlow(26, 'rgba(190,215,255,0.32)');
+      const CORES = ['235,242,255', '190,215,255', '150,195,255'];
+      const SPARKLE = (Math.random() < .25) ? makeGlow(14, 'rgba(255,255,255,0.55)') : null;
 
       function resize(){
-        W = canvas.width  = Math.ceil(window.innerWidth  * SCALE);
-        H = canvas.height = Math.ceil(window.innerHeight * SCALE);
-        ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
-        N = Math.max(10, Math.min(48, Math.round((window.innerWidth * window.innerHeight) / 20000)));
+        W = canvas.width  = Math.ceil(window.innerWidth  * DPR);
+        H = canvas.height = Math.ceil(window.innerHeight * DPR);
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        N = Math.max(12, Math.min(60, Math.round((window.innerWidth * window.innerHeight) / 16000)));
         particles = Array.from({length: N}, () => new Particle());
       }
 
@@ -4921,13 +4922,15 @@ else { initApp(); }
         const depth = Math.random();
         this.x  = Math.random() * window.innerWidth;
         this.y  = Math.random() * window.innerHeight;
-        this.r  = .4 + depth * .9;
-        this.vx = (Math.random() - .5) * (.06 + depth * .12);
-        this.vy = (Math.random() - .5) * (.06 + depth * .12);
-        this.a  = .16 + depth * .34;
+        this.r  = .55 + depth * 1.35;
+        this.vx = (Math.random() - .5) * (.05 + depth * .1);
+        this.vy = (Math.random() - .5) * (.05 + depth * .1);
+        this.a  = .2 + depth * .42;
         this.si = (Math.random() * 3) | 0;
-        this.tw = .0008 + Math.random() * .004;
+        this.tw = .0009 + Math.random() * .004;
         this.tp = Math.random() * Math.PI * 2;
+        this.hero = depth > .72 && Math.random() < .5;
+        this.sl = 2 + depth * 3;
       }
 
       function draw(){
@@ -4941,14 +4944,32 @@ else { initApp(); }
 
         for(let i = 0; i < N; i++){
           const p = particles[i];
-          const tw = .7 + .3 * Math.sin(t * p.tw + p.tp);
+          const tw = .68 + .32 * Math.sin(t * p.tw + p.tp);
           const alpha = Math.min(1, p.a * tw);
-          ctx.globalAlpha = alpha * .55;
+
+          // Isik halesi
+          ctx.globalAlpha = alpha * .35;
           ctx.drawImage(GLOW, p.x - GLOW.width/2, p.y - GLOW.height/2);
           ctx.globalAlpha = 1;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-          ctx.fillStyle = `rgba(${CORES[p.si]},${alpha})`;
-          ctx.fill();
+
+          // UHD parlak yildizlar: cekirdek + capraz isima
+          if (p.hero && alpha > .45) {
+            ctx.strokeStyle = `rgba(${CORES[p.si]},${alpha * .6})`;
+            ctx.lineWidth = .6;
+            const L = p.sl * (1 + .15 * Math.sin(t * p.tw * 2 + p.tp));
+            ctx.beginPath();
+            ctx.moveTo(p.x - L, p.y); ctx.lineTo(p.x + L, p.y);
+            ctx.moveTo(p.x, p.y - L); ctx.lineTo(p.x, p.y + L);
+            ctx.stroke();
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 1.15, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+            ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${CORES[p.si]},${alpha})`;
+            ctx.fill();
+          }
+
           p.x += p.vx; p.y += p.vy;
           const M = 40;
           if (p.x < -M) p.x = window.innerWidth + M; else if (p.x > window.innerWidth + M) p.x = -M;
@@ -6151,7 +6172,7 @@ else { initApp(); }
         const canvas = document.getElementById('v-bg-canvas');
         const on = el.classList.contains('on');
         if (id === 'cursor-toggle') { if (cur) cur.style.display = on ? '' : 'none'; if (ring) ring.style.display = on ? '' : 'none'; }
-        if (id === 'particle-toggle' && canvas) canvas.style.opacity = on ? '.65' : '0';
+        if (id === 'particle-toggle' && canvas) canvas.style.opacity = on ? '.8' : '0';
       }
     }
     function kaydetAyarlar() {
