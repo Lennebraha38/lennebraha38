@@ -36,7 +36,7 @@
     <div class="settings-card">
       <div class="settings-header">
         <h3>⚙️ Ayarlar</h3>
-        <button onclick="closeSettingsModal()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);font-size:1.1rem;transition:var(--transition);" onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.color='#ef4444'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-dim)'">✕</button>
+        <button class="ai-modal-close" onclick="closeSettingsModal()" aria-label="Ayarları kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="settings-section">
         <div class="settings-section-title">Bildirimler</div>
@@ -90,7 +90,7 @@
         </div>
         <div class="settings-row" style="cursor:pointer;" onclick="closeSettingsModal();if(confirm('Hesabı silmek istediğinden emin misin? Bu işlem geri alınamaz!')) { doLogout(); location.reload(); }">
           <div>
-            <div class="settings-row-label" style="color:#f87171">Hesabı Sil</div>
+            <div class="settings-row-label danger-text">Hesabı Sil</div>
             <div class="settings-row-sub">Tüm verilerini kalıcı olarak sil</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 14.142A2 2 0 0 1 16.138 22H7.862a2 2 0 0 1-1.995-1.858L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>
@@ -108,7 +108,7 @@
           <h3 id="basvur-title">Takıma Davet Et</h3>
           <p id="basvur-subtitle">İletişim yöntemini seç ve mesajını gönder</p>
         </div>
-        <button class="ai-modal-close" onclick="closeBasvurModal()">✕</button>
+        <button class="ai-modal-close" onclick="closeBasvurModal()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <div class="basvur-method-tabs">
@@ -243,7 +243,7 @@
           <h3>Profilini Ekle</h3>
           <p>Yeteneklerini paylaş, takımını bul</p>
         </div>
-        <button class="ai-modal-close" onclick="closeProfilFormBtn()">✕</button>
+        <button class="ai-modal-close" onclick="closeProfilFormBtn()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <!-- PROFİL FOTOĞRAFI -->

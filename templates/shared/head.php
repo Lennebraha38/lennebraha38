@@ -150,6 +150,15 @@
     /* Cursor/particle katmanlari light modda */
     html[data-theme="light"] #v-cursor { mix-blend-mode: normal; }
     html[data-theme="light"] #v-bg-canvas { opacity: 0.3; }
+    /* Light mod ek duzeltmeler */
+    html[data-theme="light"] .hero-eyebrow { color: #0E7490 !important; background: rgba(8,145,178,0.1) !important; border-color: rgba(8,145,178,0.28) !important; }
+    html[data-theme="light"] #km-box { background: #FFFFFF; border-color: rgba(21,34,56,0.12); box-shadow: 0 40px 100px rgba(0,0,0,0.28); }
+    html[data-theme="light"] #km-title { color: #152238; }
+    html[data-theme="light"] #km-subtitle { color: #5A6F85; }
+    html[data-theme="light"] #km-close-btn { background: rgba(21,34,56,0.05); border-color: rgba(21,34,56,0.1); color: #5A6F85; }
+    html[data-theme="light"] #km-close-btn:hover { background: rgba(220,38,38,0.1); color: #DC2626; }
+    html[data-theme="light"] #km-count-bar { color: #5A6F85; }
+    html[data-theme="light"] #km-count-bar strong { color: #2563EB; }
 
     /* ===== RESET ===== */
     *, *::before, *::after {
@@ -2568,6 +2577,23 @@
     }
     .gac-pw-toggle:hover { color: #e8eaed; }
     .pw-toggle, .gac-pw-toggle, .ai-modal-close, .gac-close-btn, .ef-kapat { min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; }
+
+    .ai-modal-close {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .ai-modal-close:hover {
+      background: rgba(239,68,68,0.12);
+      color: #ef4444;
+      border-color: rgba(239,68,68,0.35);
+    }
+    .danger-text { color: #f87171; }
+    html[data-theme="light"] .danger-text { color: #DC2626; }
 
     .gac-error {
       background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);

@@ -150,6 +150,15 @@
     /* Cursor/particle katmanlari light modda */
     html[data-theme="light"] #v-cursor { mix-blend-mode: normal; }
     html[data-theme="light"] #v-bg-canvas { opacity: 0.3; }
+    /* Light mod ek duzeltmeler */
+    html[data-theme="light"] .hero-eyebrow { color: #0E7490 !important; background: rgba(8,145,178,0.1) !important; border-color: rgba(8,145,178,0.28) !important; }
+    html[data-theme="light"] #km-box { background: #FFFFFF; border-color: rgba(21,34,56,0.12); box-shadow: 0 40px 100px rgba(0,0,0,0.28); }
+    html[data-theme="light"] #km-title { color: #152238; }
+    html[data-theme="light"] #km-subtitle { color: #5A6F85; }
+    html[data-theme="light"] #km-close-btn { background: rgba(21,34,56,0.05); border-color: rgba(21,34,56,0.1); color: #5A6F85; }
+    html[data-theme="light"] #km-close-btn:hover { background: rgba(220,38,38,0.1); color: #DC2626; }
+    html[data-theme="light"] #km-count-bar { color: #5A6F85; }
+    html[data-theme="light"] #km-count-bar strong { color: #2563EB; }
 
     /* ===== RESET ===== */
     *, *::before, *::after {
@@ -2569,6 +2578,23 @@
     .gac-pw-toggle:hover { color: #e8eaed; }
     .pw-toggle, .gac-pw-toggle, .ai-modal-close, .gac-close-btn, .ef-kapat { min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; }
 
+    .ai-modal-close {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .ai-modal-close:hover {
+      background: rgba(239,68,68,0.12);
+      color: #ef4444;
+      border-color: rgba(239,68,68,0.35);
+    }
+    .danger-text { color: #f87171; }
+    html[data-theme="light"] .danger-text { color: #DC2626; }
+
     .gac-error {
       background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
       color: #f28b82; border-radius: 6px; padding: 0.5rem 0.8rem;
@@ -3433,7 +3459,7 @@
     <div class="settings-card">
       <div class="settings-header">
         <h3>⚙️ Ayarlar</h3>
-        <button onclick="closeSettingsModal()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);font-size:1.1rem;transition:var(--transition);" onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.color='#ef4444'" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-dim)'">✕</button>
+        <button class="ai-modal-close" onclick="closeSettingsModal()" aria-label="Ayarları kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="settings-section">
         <div class="settings-section-title">Bildirimler</div>
@@ -3487,7 +3513,7 @@
         </div>
         <div class="settings-row" style="cursor:pointer;" onclick="closeSettingsModal();if(confirm('Hesabı silmek istediğinden emin misin? Bu işlem geri alınamaz!')) { doLogout(); location.reload(); }">
           <div>
-            <div class="settings-row-label" style="color:#f87171">Hesabı Sil</div>
+            <div class="settings-row-label danger-text">Hesabı Sil</div>
             <div class="settings-row-sub">Tüm verilerini kalıcı olarak sil</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 14.142A2 2 0 0 1 16.138 22H7.862a2 2 0 0 1-1.995-1.858L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>
@@ -3505,7 +3531,7 @@
           <h3 id="basvur-title">Takıma Davet Et</h3>
           <p id="basvur-subtitle">İletişim yöntemini seç ve mesajını gönder</p>
         </div>
-        <button class="ai-modal-close" onclick="closeBasvurModal()">✕</button>
+        <button class="ai-modal-close" onclick="closeBasvurModal()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <div class="basvur-method-tabs">
@@ -3640,7 +3666,7 @@
           <h3>Profilini Ekle</h3>
           <p>Yeteneklerini paylaş, takımını bul</p>
         </div>
-        <button class="ai-modal-close" onclick="closeProfilFormBtn()">✕</button>
+        <button class="ai-modal-close" onclick="closeProfilFormBtn()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <!-- PROFİL FOTOĞRAFI -->
@@ -4260,6 +4286,10 @@ async function initApp() {
   await initAuth();
   overrideAuthFunctions();
   setupRealtime();
+  // Veritabani (Supabase) suremleri tum sayfalarda etkin — formlar her yerden calissin
+  if (typeof overrideProfilFunctions === 'function') overrideProfilFunctions();
+  if (typeof overrideContactForm === 'function') overrideContactForm();
+  if (typeof overrideIlanFunctions === 'function') overrideIlanFunctions();
   // Sayfaya ozel init fonksiyonu varsa cagir
   if (typeof initPage === 'function') await initPage();
   console.log('✅ Quantro hazir!');
@@ -5473,15 +5503,23 @@ else { initApp(); }
         if (submitBtn) {
           submitBtn._oldCard = card;
           submitBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Profili Güncelle`;
-          submitBtn.onclick = function() {
+          const originalHTML = submitBtn.innerHTML;
+          submitBtn.onclick = async function() {
             const oldCard = this._oldCard;
-            submitProfilForm();
-            // submitProfilForm yeni kart ekler, eskiyi sil
+            // Supabase yolu (sayfa override'ini kullanir) — veritabaninda gunceller
+            const w = window.submitProfilForm;
+            if (typeof w === 'function' && w !== submitProfilForm) {
+              await w();
+            } else {
+              submitProfilForm();
+            }
             if (oldCard && oldCard.parentNode) oldCard.remove();
-            // Butonu eski haline getir
-            this.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Profili Yayınla`;
-            this.onclick = submitProfilForm;
-            this._oldCard = null;
+            const closed = !document.getElementById('profil-form-overlay').classList.contains('open');
+            if (closed) {
+              this.innerHTML = originalHTML;
+              this.onclick = submitProfilForm;
+              this._oldCard = null;
+            }
           };
         }
       }, 100);
@@ -6178,7 +6216,7 @@ else { initApp(); }
       btn.classList.toggle('on');
       const on = btn.classList.contains('on');
       const canvas = document.getElementById('v-bg-canvas');
-      if (canvas) canvas.style.opacity = on ? '.65' : '0';
+      if (canvas) canvas.style.opacity = on ? '.8' : '0';
     }
     function qtAyarlarOku() {
       try { return JSON.parse(localStorage.getItem('quantro-ayarlar') || '{}'); } catch (e) { return {}; }
