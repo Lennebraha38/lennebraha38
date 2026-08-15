@@ -146,7 +146,10 @@
     html[data-theme="light"] #gorev-detay-modal { background: rgba(15,23,42,0.35) !important; }
     html[data-theme="light"] .mobile-menu { background: rgba(255,255,255,0.98); }
     html[data-theme="light"] .mobile-menu a { color: #1B2A44; }
-    html[data-theme="light"] .auth-panel-left { background: linear-gradient(135deg, #16264A 0%, #1E4370 100%); }
+    html[data-theme="light"] .auth-panel-left { background: linear-gradient(145deg, #F7FAFE 0%, #E9F0F9 60%, #DEE9F5 100%); border-right-color: rgba(27,42,68,0.08); }
+    html[data-theme="light"] .auth-panel-left::before, html[data-theme="light"] .auth-panel-left::after { opacity: 0.5; }
+    html[data-theme="light"] .auth-panel-right { background: var(--bg-deep); }
+    html[data-theme="light"] .auth-panel-left .auth-logo, html[data-theme="light"] .auth-panel-left .auth-quote, html[data-theme="light"] .auth-panel-left .auth-footer { color: #1B2A44 !important; }
     /* Hero basliklari: beyaz degrade -> koyu (light modda gorunur olsun) */
     html[data-theme="light"] h1 { background: linear-gradient(160deg, #14213D 20%, #33517B 100%); }
     html[data-theme="light"] .h1-l1, html[data-theme="light"] .h1-l2 { background: linear-gradient(135deg, #14213D 20%, #33517B 100%); }
@@ -2371,6 +2374,8 @@
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; transition: var(--transition); color: var(--text-dim);
       flex-shrink: 0;
+      /* Auth overlay (z:99999) ekrani kaplasa bile tema butonu her zaman tiklanabilir */
+      position: relative; z-index: 100000;
     }
     .theme-toggle:hover { background: rgba(59,130,246,0.18); color: var(--primary); }
     .theme-toggle .theme-icon-sun { display: none; }
