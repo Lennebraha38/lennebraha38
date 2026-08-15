@@ -52,7 +52,7 @@
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;max-width:480px;width:90%;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
         <h3 style="font-size:1.1rem;font-weight:800;">Yeni Ekip Oluştur</h3>
-        <button onclick="closeModal('ekip-form-modal')" aria-label="Kapat" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;">✕</button>
+        <button onclick="closeModal('ekip-form-modal')" aria-label="Kapat" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <input type="text" id="ekip-isim" class="form-control" placeholder="Ekip Adı" style="margin-bottom:0.8rem;width:100%;">
       <textarea id="ekip-aciklama" class="form-control" placeholder="Ekip açıklaması..." rows="3" style="margin-bottom:0.8rem;width:100%;"></textarea>
@@ -75,7 +75,7 @@
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;max-width:500px;width:90%;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
         <h3 style="font-size:1.1rem;font-weight:800;">Yeni Görev</h3>
-        <button onclick="closeModal('gorev-form-modal')" aria-label="Kapat" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;">✕</button>
+        <button onclick="closeModal('gorev-form-modal')" aria-label="Kapat" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <input type="text" id="gorev-baslik" class="form-control" placeholder="Görev başlığı..." style="margin-bottom:0.8rem;width:100%;">
       <textarea id="gorev-aciklama" class="form-control" placeholder="Görev açıklaması..." rows="3" style="margin-bottom:0.8rem;width:100%;"></textarea>
@@ -108,7 +108,7 @@
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;max-width:460px;width:90%;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
         <h3 style="font-size:1.1rem;font-weight:800;">✉️ Üye Davet Et</h3>
-        <button onclick="closeModal('ekip-davet-modal')" aria-label="Kapat" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;">✕</button>
+        <button onclick="closeModal('ekip-davet-modal')" aria-label="Kapat" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div id="davet-form">
         <input type="email" id="davet-email" class="form-control" placeholder="Üyenin e-posta adresi" style="margin-bottom:0.8rem;width:100%;">
