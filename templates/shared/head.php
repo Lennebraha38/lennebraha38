@@ -3085,6 +3085,18 @@
     }
     .km-info-text svg { flex-shrink: 0; color: var(--primary); }
 
+    /* ===== 360Hz HISSI: akici, yaylanan mikro-etkilesimler ===== */
+    .nav a, .nav-link, .btn, .btn-ghost, .card-link, .dropdown-item,
+    .ilan-card, .profil-card, .card-3d, .kanban-col,
+    input, select, textarea, .ef-kapat, .settings-toggle, .stat-card,
+    .hero-actions .btn, .badge, .chip {
+      transition-duration: .28s;
+      transition-timing-function: cubic-bezier(.2, .8, .2, 1);
+    }
+    .btn, .btn-ghost, .card-link, .ilan-card, .profil-card, .card-3d {
+      will-change: transform;
+    }
+
   </style>
 </head>
 <body>

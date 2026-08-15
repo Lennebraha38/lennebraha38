@@ -3085,6 +3085,18 @@
     }
     .km-info-text svg { flex-shrink: 0; color: var(--primary); }
 
+    /* ===== 360Hz HISSI: akici, yaylanan mikro-etkilesimler ===== */
+    .nav a, .nav-link, .btn, .btn-ghost, .card-link, .dropdown-item,
+    .ilan-card, .profil-card, .card-3d, .kanban-col,
+    input, select, textarea, .ef-kapat, .settings-toggle, .stat-card,
+    .hero-actions .btn, .badge, .chip {
+      transition-duration: .28s;
+      transition-timing-function: cubic-bezier(.2, .8, .2, 1);
+    }
+    .btn, .btn-ghost, .card-link, .ilan-card, .profil-card, .card-3d {
+      will-change: transform;
+    }
+
   </style>
 </head>
 <body>
@@ -5076,6 +5088,9 @@ else { initApp(); }
       let running = true;
       let lastPaint = 0;
       let t = 0;
+      // Guclu cihazlarda 50fps'te boya, zayif cihazlarda 24fps — 360Hz hissi icin
+      // yuksek tekrar, jank icin dusuk tekrar
+      const FRAME_MS = (navigator.hardwareConcurrency || 4) >= 6 ? 20 : 41;
 
       function makeGlow(size, color){
         const s = document.createElement('canvas');
@@ -5106,12 +5121,14 @@ else { initApp(); }
         this.x  = Math.random() * window.innerWidth;
         this.y  = Math.random() * window.innerHeight;
         this.r  = .55 + depth * 1.35;
-        this.vx = (Math.random() - .5) * (.05 + depth * .1);
-        this.vy = (Math.random() - .5) * (.05 + depth * .1);
+        this.vx = (Math.random() - .5) * (.03 + depth * .08);
+        this.vy = (Math.random() - .5) * (.03 + depth * .08);
         this.a  = .28 + depth * .44;
         this.si = (Math.random() * 3) | 0;
         this.tw = .0009 + Math.random() * .004;
         this.tp = Math.random() * Math.PI * 2;
+        this.sw = .008 + Math.random() * .012;
+        this.sp = Math.random() * Math.PI * 2;
         this.hero = depth > .72 && Math.random() < .5;
         this.sl = 2 + depth * 3;
       }
@@ -5120,7 +5137,7 @@ else { initApp(); }
         if (!running) return;
         requestAnimationFrame(draw);
         const now = performance.now();
-        if (now - lastPaint < 41) return;
+        if (now - lastPaint < FRAME_MS) return;
         lastPaint = now;
         t += 1;
         ctx.clearRect(0, 0, W, H);
@@ -5153,7 +5170,8 @@ else { initApp(); }
             ctx.fill();
           }
 
-          p.x += p.vx; p.y += p.vy;
+          p.x += p.vx;
+          p.y += p.vy + Math.sin(t * p.sw + p.sp) * .06;
           const M = 40;
           if (p.x < -M) p.x = window.innerWidth + M; else if (p.x > window.innerWidth + M) p.x = -M;
           if (p.y < -M) p.y = window.innerHeight + M; else if (p.y > window.innerHeight + M) p.y = -M;
@@ -5260,7 +5278,7 @@ else { initApp(); }
       document.addEventListener('visibilitychange', () => { if (!document.hidden) kickLoop(); });
       function loop(ts){
         if (document.hidden || offscreen) { loopActive = false; return; }
-        if (ts - lastFrame >= 33) {
+        if (ts - lastFrame >= 20) {
           lastFrame = ts;
           rotY += .0038 + mx*.0009;
           rotX  = Math.max(-.5, Math.min(.8, rotX + my*.00025));
@@ -5289,8 +5307,8 @@ else { initApp(); }
       let dx = 0, dy = 0;
 
       // Use time-based lerp so speed is FPS-independent (120fps smooth)
-      const RING_SPEED = 14;   // degrees/sec feel
-      const DOT_SPEED  = 38;
+      const RING_SPEED = 24;   // 360Hz hissi: hizli ve akici takip
+      const DOT_SPEED  = 64;
 
       let lastTime = 0;
       let isHovering = false;
