@@ -80,15 +80,15 @@
       --brand-light: #1E3A5F;
       --brand-glow: rgba(21,34,56,0.15);
 
-      /* Surfaces — light */
-      --bg-deep: #F4F6F9;
+      /* Surfaces — light (yumusak, goz yormayan tonlar) */
+      --bg-deep: #F5F8FC;
       --bg-surface: #FFFFFF;
       --bg-card: #FFFFFF;
-      --bg-card-hover: #F0F3F8;
+      --bg-card-hover: #EEF3FA;
 
       /* Accent */
       --primary: #2563EB;
-      --primary-glow: rgba(37,99,235,0.15);
+      --primary-glow: rgba(37,99,235,0.14);
       --accent: #0891B2;
       --accent-glow: rgba(8,145,178,0.12);
 
@@ -98,67 +98,83 @@
       --warning: #D97706;
       --danger: #DC2626;
 
-      /* Text */
-      --text-main: #152238;
-      --text-dim: #5A6F85;
-      --text-muted: #8A9BB5;
+      /* Text — keskin siyah yerine yumusak lacivert tonlar */
+      --text-main: #1B2A44;
+      --text-dim: #455E7E;
+      --text-muted: #7E91AC;
 
       /* Borders & Effects */
-      --border: rgba(21,34,56,0.10);
-      --border-hover: rgba(37,99,235,0.25);
+      --border: rgba(27,42,68,0.08);
+      --border-hover: rgba(37,99,235,0.30);
       --border-active: rgba(8,145,178,0.35);
-      --glass: rgba(255,255,255,0.88);
+      --glass: rgba(255,255,255,0.82);
 
-      /* Shadows */
-      --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-      --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
-      --shadow-lg: 0 16px 48px -12px rgba(0,0,0,0.12), 0 0 30px -8px var(--brand-glow);
-      --shadow-glow: 0 0 20px var(--brand-glow);
+      /* Shadows — yumusak ve hafif */
+      --shadow-sm: 0 2px 10px rgba(21,34,56,0.05);
+      --shadow-md: 0 10px 28px rgba(21,34,56,0.07);
+      --shadow-lg: 0 18px 50px -12px rgba(21,34,56,0.10), 0 0 26px -10px rgba(37,99,235,0.18);
+      --shadow-glow: 0 0 20px rgba(37,99,235,0.10);
     }
 
     /* Light-specific overrides — ayri kural bloklari (eski tarayicilarda CSS nesting desteklenmez) */
-    html[data-theme="light"] .bg-scene { opacity: 0.25; }
-    html[data-theme="light"] .noise-overlay { opacity: 0.12; }
-    html[data-theme="light"] .nav-content { background: rgba(255,255,255,0.92) !important; border-bottom-color: rgba(21,34,56,0.06) !important; }
-    html[data-theme="light"] #main-nav { background: rgba(255,255,255,0.92); border-bottom-color: rgba(21,34,56,0.06); }
-    html[data-theme="light"] nav.scrolled { background: rgba(255,255,255,0.92); }
-    html[data-theme="light"] .section-header h2 { color: #152238; }
-    html[data-theme="light"] .kanban-col { background: #F4F6F9; border-color: rgba(21,34,56,0.06); }
-    html[data-theme="light"] .gorev-card { background: #FFFFFF; border-color: rgba(21,34,56,0.08); }
-    html[data-theme="light"] .gorev-card:hover { border-color: rgba(37,99,235,0.25); }
-    html[data-theme="light"] .ekip-card { background: #FFFFFF; border-color: rgba(21,34,56,0.08); }
-    html[data-theme="light"] .ekip-card:hover { border-color: rgba(37,99,235,0.2); }
-    html[data-theme="light"] .form-control { background: #FFFFFF; color: #152238; border-color: rgba(21,34,56,0.12); }
-    html[data-theme="light"] select.form-control { background-color: #FFFFFF; color: #152238 !important; }
-    html[data-theme="light"] select.form-control option { background-color: #FFFFFF; color: #152238; }
-    html[data-theme="light"] .profil-filter-select option { background-color: #FFFFFF; color: #152238; }
-    html[data-theme="light"] .btn-primary { box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
-    html[data-theme="light"] footer { background: #FFFFFF; border-top-color: rgba(21,34,56,0.06); }
-    html[data-theme="light"] footer .footer-bottom { border-top-color: rgba(21,34,56,0.06); }
-    html[data-theme="light"] #gorev-detay-modal { background: rgba(0,0,0,0.3) !important; }
+    /* Yumusak degrade arka plan — duz beyaz degil, goz yormayan mavi-gri ton */
+    html[data-theme="light"] body { background: linear-gradient(160deg, #F7FAFE 0%, #EFF4FB 55%, #EAF1F9 100%); background-attachment: fixed; }
+    html[data-theme="light"] .bg-scene { opacity: 0.5; }
+    /* Koyu orblar light'ta leke gibi duruyordu — pastel acik tonlara gec */
+    html[data-theme="light"] .bg-orb-1 { background: radial-gradient(circle, rgba(147,197,253,0.55), transparent 76%); opacity: 0.6; }
+    html[data-theme="light"] .bg-orb-2 { background: radial-gradient(circle, rgba(191,219,254,0.5), transparent 76%); opacity: 0.6; }
+    html[data-theme="light"] .bg-orb-3 { background: radial-gradient(circle, rgba(165,243,252,0.45), transparent 76%); opacity: 0.55; }
+    html[data-theme="light"] .bg-grid { background-image: linear-gradient(rgba(46,111,207,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(46,111,207,0.07) 1px, transparent 1px); }
+    html[data-theme="light"] .noise-overlay { opacity: 0.05; }
+    html[data-theme="light"] .nav-content { background: rgba(255,255,255,0.88) !important; border-bottom-color: rgba(27,42,68,0.06) !important; }
+    html[data-theme="light"] #main-nav { background: rgba(255,255,255,0.88); border-bottom-color: rgba(27,42,68,0.06); }
+    html[data-theme="light"] nav.scrolled { background: rgba(255,255,255,0.92); box-shadow: 0 8px 30px rgba(21,34,56,0.06); }
+    html[data-theme="light"] .section-header h2 { color: #16264A; }
+    html[data-theme="light"] .kanban-col { background: #F1F5FB; border-color: rgba(27,42,68,0.06); }
+    html[data-theme="light"] .gorev-card { background: #FFFFFF; border-color: rgba(27,42,68,0.08); box-shadow: var(--shadow-sm); }
+    html[data-theme="light"] .gorev-card:hover { border-color: rgba(37,99,235,0.3); box-shadow: var(--shadow-md); }
+    html[data-theme="light"] .ekip-card { background: #FFFFFF; border-color: rgba(27,42,68,0.08); }
+    html[data-theme="light"] .ekip-card:hover { border-color: rgba(37,99,235,0.25); }
+    html[data-theme="light"] .form-control { background: #FFFFFF; color: #1B2A44; border-color: rgba(27,42,68,0.12); }
+    html[data-theme="light"] .form-control:focus { border-color: rgba(37,99,235,0.45); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    html[data-theme="light"] select.form-control { background-color: #FFFFFF; color: #1B2A44 !important; }
+    html[data-theme="light"] select.form-control option { background-color: #FFFFFF; color: #1B2A44; }
+    html[data-theme="light"] .profil-filter-select option { background-color: #FFFFFF; color: #1B2A44; }
+    html[data-theme="light"] .btn-primary { box-shadow: 0 6px 16px rgba(37,99,235,0.22); }
+    html[data-theme="light"] footer { background: rgba(255,255,255,0.9); border-top-color: rgba(27,42,68,0.06); }
+    html[data-theme="light"] footer .footer-bottom { border-top-color: rgba(27,42,68,0.06); }
+    html[data-theme="light"] #gorev-detay-modal { background: rgba(15,23,42,0.35) !important; }
     html[data-theme="light"] .mobile-menu { background: rgba(255,255,255,0.98); }
-    html[data-theme="light"] .mobile-menu a { color: #152238; }
-    html[data-theme="light"] .auth-panel-left { background: linear-gradient(135deg, #152238 0%, #1a3a5c 100%); }
+    html[data-theme="light"] .mobile-menu a { color: #1B2A44; }
+    html[data-theme="light"] .auth-panel-left { background: linear-gradient(135deg, #16264A 0%, #1E4370 100%); }
     /* Hero basliklari: beyaz degrade -> koyu (light modda gorunur olsun) */
-    html[data-theme="light"] h1 { background: linear-gradient(160deg, #152238 30%, #5A6F85 100%); }
-    html[data-theme="light"] .h1-l1, html[data-theme="light"] .h1-l2 { background: linear-gradient(135deg, #152238 30%, #5A6F85 100%); }
+    html[data-theme="light"] h1 { background: linear-gradient(160deg, #14213D 20%, #33517B 100%); }
+    html[data-theme="light"] .h1-l1, html[data-theme="light"] .h1-l2 { background: linear-gradient(135deg, #14213D 20%, #33517B 100%); }
+    /* "Bizden." satiri: acik ucu beyaza kacan degrade -> tam koyu cyan */
+    html[data-theme="light"] .h1-l3 { background: linear-gradient(135deg, #1D4ED8 0%, #0891B2 70%, #0E7490 100%); }
+    html[data-theme="light"] .hero-subtitle { color: #455E7E; }
+    html[data-theme="light"] .hero-badge { background: rgba(8,145,178,0.12); color: #0E7490; border-color: rgba(8,145,178,0.28); }
+    html[data-theme="light"] .stat-value { color: #14213D; }
+    html[data-theme="light"] .feature-card:hover { background: #F6F9FE; }
     /* Yarismalar kategori kartlari light modda */
-    html[data-theme="light"] .km-card { background: #FFFFFF; border-color: rgba(21,34,56,0.1); }
-    html[data-theme="light"] .km-card:hover { background: #F0F3F8; }
-    html[data-theme="light"] .km-card-name { color: #152238; }
-    html[data-theme="light"] .km-card-desc { color: #5A6F85; }
+    html[data-theme="light"] .km-card { background: #FFFFFF; border-color: rgba(27,42,68,0.08); }
+    html[data-theme="light"] .km-card:hover { background: #F3F7FD; }
+    html[data-theme="light"] .km-card-name { color: #16264A; }
+    html[data-theme="light"] .km-card-desc { color: #455E7E; }
     /* Cursor/particle katmanlari light modda */
     html[data-theme="light"] #v-cursor { mix-blend-mode: normal; }
-    html[data-theme="light"] #v-bg-canvas { opacity: 0.3; }
+    html[data-theme="light"] #v-bg-canvas { opacity: 0.32; }
     /* Light mod ek duzeltmeler */
-    html[data-theme="light"] .hero-eyebrow { color: #0E7490 !important; background: rgba(8,145,178,0.1) !important; border-color: rgba(8,145,178,0.28) !important; }
-    html[data-theme="light"] #km-box { background: #FFFFFF; border-color: rgba(21,34,56,0.12); box-shadow: 0 40px 100px rgba(0,0,0,0.28); }
-    html[data-theme="light"] #km-title { color: #152238; }
-    html[data-theme="light"] #km-subtitle { color: #5A6F85; }
-    html[data-theme="light"] #km-close-btn { background: rgba(21,34,56,0.05); border-color: rgba(21,34,56,0.1); color: #5A6F85; }
+    html[data-theme="light"] .hero-eyebrow { color: #0E7490 !important; background: rgba(8,145,178,0.12) !important; border-color: rgba(8,145,178,0.25) !important; }
+    html[data-theme="light"] #km-box { background: #FFFFFF; border-color: rgba(27,42,68,0.12); box-shadow: 0 40px 100px rgba(15,23,42,0.25); }
+    html[data-theme="light"] #km-title { color: #16264A; }
+    html[data-theme="light"] #km-subtitle { color: #455E7E; }
+    html[data-theme="light"] #km-close-btn { background: rgba(27,42,68,0.05); border-color: rgba(27,42,68,0.1); color: #455E7E; }
     html[data-theme="light"] #km-close-btn:hover { background: rgba(220,38,38,0.1); color: #DC2626; }
-    html[data-theme="light"] #km-count-bar { color: #5A6F85; }
+    html[data-theme="light"] #km-count-bar { color: #455E7E; }
     html[data-theme="light"] #km-count-bar strong { color: #2563EB; }
+    /* Toast light modda: koyu gradyan okunur kalsin, goz seviyesinde yumusak golge */
+    html[data-theme="light"] #toast { box-shadow: 0 14px 40px rgba(15,23,42,0.25), 0 0 20px rgba(37,99,235,0.15); }
 
     /* ===== RESET ===== */
     *, *::before, *::after {
@@ -1396,7 +1412,7 @@
       border-radius: 100px;
       font-weight: 700;
       font-size: 0.875rem;
-      z-index: 3000;
+      z-index: 99999;
       border: 1px solid rgba(59,130,246,0.3);
       box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(59,130,246,0.2);
       transition: transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.5s;
