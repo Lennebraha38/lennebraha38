@@ -5568,6 +5568,14 @@ else { initApp(); }
         if (bioEl)   document.getElementById('pf-bio').value = bioEl.textContent.trim();
         const skills = Array.from(card.querySelectorAll('.profil-skill')).map(s => s.textContent.trim()).join(', ');
         document.getElementById('pf-skills').value = skills;
+        // Tum alanlari doldur — aksi halde Guncelle, zorunlu alan bos diye sessizce iptal olur
+        if (card.dataset.iletisim) document.getElementById('pf-iletisim').value = card.dataset.iletisim;
+        const sehirEl = document.getElementById('pf-sehir');
+        if (sehirEl && card.dataset.sehir) sehirEl.value = card.dataset.sehir;
+        const saatEl = document.getElementById('pf-saat');
+        if (saatEl && card.dataset.saat) saatEl.value = card.dataset.saat;
+        const alanEl = document.getElementById('pf-alan');
+        if (alanEl && card.dataset.alan) alanEl.value = card.dataset.alan;
         // Eski kartı kaydet, kaydet butonunu "Güncelle" moduna al
         document.getElementById('profil-form-overlay').dataset.editCard = '';
         const submitBtn = document.querySelector('#profil-form-overlay .btn-primary');
