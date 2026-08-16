@@ -150,6 +150,9 @@
     html[data-theme="light"] .auth-panel-left::before, html[data-theme="light"] .auth-panel-left::after { opacity: 0.5; }
     html[data-theme="light"] .auth-panel-right { background: var(--bg-deep); }
     html[data-theme="light"] .auth-panel-left .auth-logo, html[data-theme="light"] .auth-panel-left .auth-quote, html[data-theme="light"] .auth-panel-left .auth-footer { color: #1B2A44 !important; }
+    /* Giris ekraninin icindeki tema butonu (nav giris ekraninin altinda kaldigi icin ayri buton gerekli) */
+    .auth-theme-toggle { position: fixed; top: 1.2rem; right: 1.2rem; z-index: 100001; }
+    html[data-theme="light"] .auth-theme-toggle { background: rgba(27,42,68,0.07); border-color: rgba(27,42,68,0.12); }
     /* Hero basliklari: beyaz degrade -> koyu (light modda gorunur olsun) */
     html[data-theme="light"] h1 { background: linear-gradient(160deg, #14213D 20%, #33517B 100%); }
     html[data-theme="light"] .h1-l1, html[data-theme="light"] .h1-l2 { background: linear-gradient(135deg, #14213D 20%, #33517B 100%); }
