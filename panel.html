@@ -3040,6 +3040,14 @@
     .vz-modal-head h3 { margin: 0; }
     .dm-alici { font-size: .9rem; color: var(--text-dim, #7f93b5); margin-bottom: .9rem; }
 
+    .dm-tab { padding: .45rem .9rem; border-radius: 999px; cursor: pointer; font-size: .82rem; font-weight: 600;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border, rgba(255,255,255,.1)); color: var(--text-dim, #7f93b5); }
+    .dm-tab.active { background: var(--primary, #7c3aed); color: #fff; border-color: transparent; }
+    .dm-mesaj { background: rgba(255,255,255,.03); border: 1px solid var(--border, rgba(255,255,255,.07)); border-radius: 12px; padding: .8rem .95rem; margin-bottom: .6rem; }
+    .dm-mesaj.yeni { border-color: rgba(124,58,237,.45); background: rgba(124,58,237,.07); }
+    .dm-mesaj-ust { display: flex; justify-content: space-between; gap: .6rem; font-size: .76rem; color: var(--text-dim, #7f93b5); margin-bottom: .35rem; }
+    .dm-mesaj-icerik { font-size: .88rem; line-height: 1.5; word-break: break-word; }
+
     #vizyon-toast {
       position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff;
@@ -3403,6 +3411,11 @@
               <button class="dropdown-item" onclick="closeUserDropdown(); openProfilForm()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 Profili Düzelt
+              </button>
+              <button class="dropdown-item" onclick="closeUserDropdown(); openDmModal('','')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Mesajlar
+                <span class="nav-icon-wrap"><span class="dm-bildirim-rozet" id="dm-bildirim-rozet"></span></span>
               </button>
               <div class="dropdown-divider"></div>
               <button class="dropdown-item danger" onclick="closeUserDropdown(); doLogout()">
@@ -3884,18 +3897,27 @@
 
   <!-- ===== DM MODAL ===== -->
   <div class="vz-overlay" id="dm-modal" onclick="if(event.target===this)closeDmModal()">
-    <div class="vz-modal">
+    <div class="vz-modal" style="max-width:520px;">
       <div class="vz-modal-head">
-        <h3>💬 Mesaj Gönder</h3>
+        <h3>💬 Mesajlar</h3>
         <button class="ai-modal-close" onclick="closeDmModal()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="dm-alici">Kime: <b id="dm-alici-ad"></b></div>
-      <input type="hidden" id="dm-alici">
-      <div class="form-group" style="margin-bottom:1rem;">
-        <label class="form-label">Mesajın</label>
-        <textarea class="form-control" id="dm-icerik" rows="4" placeholder="Merhaba, takımına katılmak istiyorum..."></textarea>
+      <div class="dm-tablar" style="display:flex;gap:.4rem;margin-bottom:1rem;">
+        <button class="dm-tab active" id="dm-tab-gelen" onclick="dmTab('gelen')">✉️ Gelen</button>
+        <button class="dm-tab" id="dm-tab-yeni" onclick="dmTab('yeni')">➤ Yeni Mesaj</button>
       </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="gonderDm()">Gönder</button>
+      <div id="dm-gelen-kutusu">
+        <div class="forum-bos">Yükleniyor...</div>
+      </div>
+      <div id="dm-yeni-form" style="display:none;">
+        <div class="dm-alici">Kime: <b id="dm-alici-ad"></b></div>
+        <input type="hidden" id="dm-alici">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Mesajın</label>
+          <textarea class="form-control" id="dm-icerik" rows="4" placeholder="Merhaba, takımına katılmak istiyorum..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="gonderDm()">Gönder</button>
+      </div>
     </div>
   </div>
 
@@ -4304,6 +4326,8 @@ async function supabaseRegister(name, email, password) {
   const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
   if (error) { const e = document.getElementById('auth-error'); if (e) { e.textContent = error.message; e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 3500); } return false; }
   if (typeof showToast === 'function') showToast('✅ Kayıt tamamlandı!');
+  xpEkle('kayit', 40);
+  rozetVer('ilk-kayit');
   return true;
 }
 
@@ -4484,12 +4508,13 @@ async function supabaseCreateProfil(fd, avatarFile) {
     const { error: upErr } = await supabase.storage.from('avatarlar').upload(fn, avatarFile);
     if (!upErr) { const { data: urlData } = supabase.storage.from('avatarlar').getPublicUrl(fn); avatarUrl = urlData?.publicUrl || ''; }
   }
-  const { data, error } = await supabase.from('profiller').insert({
+  const insertData = {
     user_id: session?.user?.id, isim: fd.isim, eposta: session?.user?.email, bio: fd.bio,
     yetenekler: fd.yetenekler, sehir: fd.sehir, musaitlik: 'Müsait', avatar_url: avatarUrl,
-    iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat,
-    ariyorum: fd.ariyorum
-  }).select().single();
+    iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat
+  };
+  if (fd.ariyorum) insertData.ariyorum = fd.ariyorum;
+  const { data, error } = await supabase.from('profiller').insert(insertData).select().single();
   if (error) { console.error(error.message); if (typeof showToast==='function') showToast('⚠️ Profil oluşturulamadı!'); return null; }
   return data;
 }
@@ -4505,11 +4530,12 @@ async function supabaseUpdateProfil(id, fd, avatarFile) {
     const { error: upErr } = await supabase.storage.from('avatarlar').upload(fn, avatarFile);
     if (!upErr) { const { data: urlData } = supabase.storage.from('avatarlar').getPublicUrl(fn); avatarUrl = urlData?.publicUrl || ''; }
   }
-  const { error } = await supabase.from('profiller').update({
+  const updateData = {
     isim: fd.isim, bio: fd.bio, yetenekler: fd.yetenekler, sehir: fd.sehir,
-    avatar_url: avatarUrl, iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat,
-    ariyorum: fd.ariyorum
-  }).eq('id', id);
+    avatar_url: avatarUrl, iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat
+  };
+  if (fd.ariyorum) updateData.ariyorum = fd.ariyorum;
+  const { error } = await supabase.from('profiller').update(updateData).eq('id', id);
   if (error) { console.error(error.message); if (typeof showToast==='function') showToast('⚠️ Profil güncellenemedi!'); return null; }
   return { id };
 }
@@ -4538,6 +4564,7 @@ function overrideProfilFunctions() {
     if (r) {
       window._pfAvatarFile = null;
       window._editProfilId = null;
+      if (!editId) { xpEkle('profil-olustur', 50); rozetVer('profil-tam'); }
       await loadProfiller();
       if (typeof closeProfilForm==='function') closeProfilForm();
       if (typeof showToast==='function') showToast('✅ '+isim+' profili ' + (editId ? 'güncellendi!' : 'eklendi!'));
@@ -4752,17 +4779,53 @@ window.dmGonder = dmGonder;
 window.openDmModal = function(aliciEmail, aliciAd) {
   const m = document.getElementById('dm-modal');
   if (!m) return;
-  document.getElementById('dm-alici').value = aliciEmail;
-  document.getElementById('dm-alici-ad').textContent = aliciAd || aliciEmail;
+  document.getElementById('dm-alici').value = aliciEmail || '';
+  document.getElementById('dm-alici-ad').textContent = aliciAd || aliciEmail || '';
   document.getElementById('dm-icerik').value = '';
+  dmTab(aliciEmail ? 'yeni' : 'gelen');
   m.classList.add('open');
+  if (!aliciEmail) dmGelenKutusuYukle();
 };
 window.closeDmModal = function() { const m = document.getElementById('dm-modal'); if (m) m.classList.remove('open'); };
 window.gonderDm = async function() {
   const alici = document.getElementById('dm-alici')?.value;
   const icerik = document.getElementById('dm-icerik')?.value;
-  if (await dmGonder(alici, icerik)) window.closeDmModal();
+  if (await dmGonder(alici, icerik)) { document.getElementById('dm-icerik').value = ''; dmTab('gelen'); dmGelenKutusuYukle(); }
 };
+window.dmTab = function(sekme) {
+  const gelen = document.getElementById('dm-gelen-kutusu');
+  const yeni = document.getElementById('dm-yeni-form');
+  const tg = document.getElementById('dm-tab-gelen');
+  const ty = document.getElementById('dm-tab-yeni');
+  if (!gelen || !yeni) return;
+  if (sekme === 'gelen') {
+    gelen.style.display = ''; yeni.style.display = 'none';
+    tg.classList.add('active'); ty.classList.remove('active');
+    dmGelenKutusuYukle();
+  } else {
+    gelen.style.display = 'none'; yeni.style.display = '';
+    tg.classList.remove('active'); ty.classList.add('active');
+  }
+};
+async function dmGelenKutusuYukle() {
+  const kutucuk = document.getElementById('dm-gelen-kutusu');
+  if (!kutucuk) return;
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { kutucuk.innerHTML = '<div class="forum-bos">Mesajları görmek için giriş yapmalısın.</div>'; return; }
+    const { data } = await supabase.from('dm_mesajlari').select('*').eq('alici_email', s.user.email).order('tarih', { ascending: false }).limit(50);
+    if (!data || !data.length) { kutucuk.innerHTML = '<div class="forum-bos">Gelen kutusu boş. Profillerden birine "Mesaj" gönderebilirsin.</div>'; return; }
+    kutucuk.innerHTML = data.map(m => `
+      <div class="dm-mesaj ${m.okundu ? '' : 'yeni'}">
+        <div class="dm-mesaj-ust"><b>${m.okundu ? '👁️' : '🆕'} ${m.gonderen_id.slice(0, 8)}</b><span>${new Date(m.tarih).toLocaleString('tr-TR')}</span></div>
+        <div class="dm-mesaj-icerik">${m.icerik.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>
+      </div>`).join('');
+    const ids = data.filter(m => !m.okundu).map(m => m.id);
+    if (ids.length) { try { await supabase.from('dm_mesajlari').update({ okundu: true }).in('id', ids); } catch (e) {} }
+    const rozet = document.getElementById('dm-bildirim-rozet');
+    if (rozet) { rozet.textContent = ''; rozet.style.display = 'none'; }
+  } catch (e) { kutucuk.innerHTML = '<div class="forum-bos">Gelen kutusu yüklenemedi.</div>'; }
+}
 
 // ---- FORUM ----
 const FORUM_ETIKETLER = { 'genel': 'Genel', 'yarisma': 'Yarışma', 'takim': 'Takım', 'mentorluk': 'Mentorluk', 'duyuru': 'Duyuru' };
@@ -4805,6 +4868,7 @@ window.forumKonuEkle = async function() {
     forumYukle(etiket);
     showToast('✅ Konu yayınlandı!');
     xpEkle('forum-konu', 10);
+    rozetVer('forumcu');
   } catch (e) { showToast('⚠️ Konu açılamadı!'); }
 };
 window.forumDetayYukle = async function(konuId) {
@@ -4902,6 +4966,7 @@ window.projeKaydet = async function() {
     window.projeYeniModalKapat();
     projeYukle();
     xpEkle('proje-ekle', 20);
+    rozetVer('proje-sahibi');
     showToast('✅ Proje eklendi!');
   } catch (e) { showToast('⚠️ Proje kaydedilemedi!'); }
 };
@@ -4966,6 +5031,7 @@ window.mentorKaydet = async function() {
     window.mentorYeniModalKapat();
     mentorYukle();
     xpEkle('mentor-ol', 25);
+    rozetVer('mentor');
     showToast('✅ Mentor profili oluşturuldu!');
   } catch (e) { showToast('⚠️ Mentor kaydedilemedi!'); }
 };
@@ -6495,7 +6561,7 @@ else { initApp(); }
         if (saatEl && card.dataset.saat) saatEl.value = card.dataset.saat;
         const alanEl = document.getElementById('pf-alan');
         if (alanEl && card.dataset.alan) alanEl.value = card.dataset.alan;
-        if (card.dataset.ariyorum) document.getElementById('pf-ariyorum').value = card.dataset.ariyorum;
+        document.getElementById('pf-ariyorum').value = card.dataset.ariyorum || '';
         // Eski kartı kaydet, kaydet butonunu "Güncelle" moduna al
         document.getElementById('profil-form-overlay').dataset.editCard = '';
         const submitBtn = document.querySelector('#profil-form-overlay .btn-primary');
@@ -6550,6 +6616,8 @@ else { initApp(); }
       const color    = card.dataset.color || 'linear-gradient(135deg,#3b82f6,#06b6d4)';
       const initials = card.dataset.initials || name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
       const alan     = card.dataset.alan || '';
+      const ariyorum = card.dataset.ariyorum || '';
+      const eposta   = card.dataset.eposta || '';
       const alanLabel= {yazilim:'Yazılım',  'yapay-zeka':'Yapay Zeka', donanim:'Donanım / Elektronik', tasarim:'Tasarım', siber:'Siber Güvenlik', mekanik:'Mekanik'}[alan] || alan;
 
       const skills = Array.from(card.querySelectorAll('.profil-skill')).map(s => s.textContent.trim());
@@ -6575,6 +6643,7 @@ else { initApp(); }
               <div class="pdm-available-badge">Müsait</div>
             </div>
             <div class="pdm-bio">${escapeHtml(bio) || '<span style="color:var(--text-dim);font-style:italic;">Biyografi eklenmemiş.</span>'}</div>
+            ${ariyorum ? `<div class="profil-ariyor" style="margin-top:.7rem;"><span>🧲</span>${escapeHtml(ariyorum)}</div>` : ''}
             ${skills.length ? `
             <div class="pdm-section-title">Beceriler & Uzmanlıklar</div>
             <div class="pdm-skills">${skillHTML}</div>` : ''}
@@ -6596,6 +6665,10 @@ else { initApp(); }
             ${iletisim ? `<button class="idm-apply-btn" id="pdm-contact-copy" onclick="copyContactInfo(this.dataset.info)" data-info="${escapeHtml(iletisim)}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               İletişimi Kopyala
+            </button>` : ''}
+            ${eposta ? `<button class="idm-apply-btn" style="background:var(--primary);color:#fff;border:none;" onclick="closeProfilDetail();openDmModal('${escapeHtml(eposta)}', '${escapeHtml(name)}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Mesaj Gönder
             </button>` : ''}
 
           </div>

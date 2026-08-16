@@ -3040,6 +3040,14 @@
     .vz-modal-head h3 { margin: 0; }
     .dm-alici { font-size: .9rem; color: var(--text-dim, #7f93b5); margin-bottom: .9rem; }
 
+    .dm-tab { padding: .45rem .9rem; border-radius: 999px; cursor: pointer; font-size: .82rem; font-weight: 600;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border, rgba(255,255,255,.1)); color: var(--text-dim, #7f93b5); }
+    .dm-tab.active { background: var(--primary, #7c3aed); color: #fff; border-color: transparent; }
+    .dm-mesaj { background: rgba(255,255,255,.03); border: 1px solid var(--border, rgba(255,255,255,.07)); border-radius: 12px; padding: .8rem .95rem; margin-bottom: .6rem; }
+    .dm-mesaj.yeni { border-color: rgba(124,58,237,.45); background: rgba(124,58,237,.07); }
+    .dm-mesaj-ust { display: flex; justify-content: space-between; gap: .6rem; font-size: .76rem; color: var(--text-dim, #7f93b5); margin-bottom: .35rem; }
+    .dm-mesaj-icerik { font-size: .88rem; line-height: 1.5; word-break: break-word; }
+
     #vizyon-toast {
       position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff;

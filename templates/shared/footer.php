@@ -425,18 +425,27 @@
 
   <!-- ===== DM MODAL ===== -->
   <div class="vz-overlay" id="dm-modal" onclick="if(event.target===this)closeDmModal()">
-    <div class="vz-modal">
+    <div class="vz-modal" style="max-width:520px;">
       <div class="vz-modal-head">
-        <h3>💬 Mesaj Gönder</h3>
+        <h3>💬 Mesajlar</h3>
         <button class="ai-modal-close" onclick="closeDmModal()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="dm-alici">Kime: <b id="dm-alici-ad"></b></div>
-      <input type="hidden" id="dm-alici">
-      <div class="form-group" style="margin-bottom:1rem;">
-        <label class="form-label">Mesajın</label>
-        <textarea class="form-control" id="dm-icerik" rows="4" placeholder="Merhaba, takımına katılmak istiyorum..."></textarea>
+      <div class="dm-tablar" style="display:flex;gap:.4rem;margin-bottom:1rem;">
+        <button class="dm-tab active" id="dm-tab-gelen" onclick="dmTab('gelen')">✉️ Gelen</button>
+        <button class="dm-tab" id="dm-tab-yeni" onclick="dmTab('yeni')">➤ Yeni Mesaj</button>
       </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="gonderDm()">Gönder</button>
+      <div id="dm-gelen-kutusu">
+        <div class="forum-bos">Yükleniyor...</div>
+      </div>
+      <div id="dm-yeni-form" style="display:none;">
+        <div class="dm-alici">Kime: <b id="dm-alici-ad"></b></div>
+        <input type="hidden" id="dm-alici">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Mesajın</label>
+          <textarea class="form-control" id="dm-icerik" rows="4" placeholder="Merhaba, takımına katılmak istiyorum..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="gonderDm()">Gönder</button>
+      </div>
     </div>
   </div>
 
