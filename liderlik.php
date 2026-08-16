@@ -14,7 +14,7 @@
           <button class="btn btn-ghost" onclick="rozetlerimGoster()">Rozetlerim</button>
         </div>
         <div id="liderlik-listesi"></div>
-        <div id="rozetlerim-listesi" style="display:none;display:flex;flex-wrap:wrap;gap:.8rem;"></div>
+        <div id="rozetlerim-listesi" style="display:none;"></div>
       </div>
 
       <div class="icerik-dolu reveal" style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.3rem;">

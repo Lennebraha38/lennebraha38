@@ -3157,6 +3157,13 @@
     .mentor-tanitim { font-size: .87rem; color: var(--text-dim, #7f93b5); line-height: 1.5; margin-bottom: .7rem; }
 
     .oy-satir { display: flex; align-items: center; gap: .7rem; margin-bottom: .55rem; font-size: .9rem; }
+    .oy-form { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; margin-bottom: .4rem; }
+    .oy-form input {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border, rgba(255,255,255,.12));
+      border-radius: 10px; padding: .65rem .85rem; color: var(--text, #e6edf7); font-size: .88rem; outline: none;
+      min-width: 160px; flex: 1;
+    }
+    .oy-form input:focus { border-color: var(--primary, #7c3aed); }
     .oy-bar { flex: 1; background: rgba(255,255,255,.07); height: 9px; border-radius: 999px; overflow: hidden; }
     .oy-bar div { height: 100%; background: linear-gradient(90deg, #7c3aed, #2563eb); border-radius: 999px; transition: width .5s; }
 
@@ -5309,6 +5316,14 @@ async function liderlikYukle() {
     const rozetKodlari = new Set(rozetler.map(r => r.kod));
     const konteyner = document.getElementById('liderlik-listesi');
     if (!konteyner) return;
+    konteyner.style.display = '';
+    const rozetKutusu = document.getElementById('rozetlerim-listesi');
+    if (rozetKutusu) rozetKutusu.style.display = 'none';
+    rozetlerimGoster._acik = false;
+    const rozetBtn = document.querySelector('button[onclick*="rozetlerimGoster"]');
+    if (rozetBtn) { rozetBtn.classList.remove('btn-primary'); rozetBtn.classList.add('btn-ghost'); }
+    const siralaBtn = document.querySelector('button[onclick*="liderlikYukle"]');
+    if (siralaBtn) { siralaBtn.classList.add('btn-primary'); siralaBtn.classList.remove('btn-ghost'); }
     if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">XP henüz toplanmadı — aktivitelerden XP kazan ve zirveye çık! 🏆</div>'; return; }
     const s = (await supabase.auth.getSession()).data.session;
     const ben = s?.user?.id;
@@ -5336,6 +5351,15 @@ async function rozetlerimGoster() {
         <div class="rozet-ikon">${tanimlar[k].split(' ')[0]}</div>
         <div class="rozet-ad">${tanimlar[k].split(' ').slice(1).join(' ')}</div>
       </div>`).join('');
+    konteyner.style.display = 'flex';
+    konteyner.style.flexWrap = 'wrap';
+    konteyner.style.gap = '.8rem';
+    document.getElementById('liderlik-listesi').style.display = 'none';
+    rozetlerimGoster._acik = true;
+    document.querySelector('button[onclick*="rozetlerimGoster"]').classList.add('btn-primary');
+    document.querySelector('button[onclick*="rozetlerimGoster"]').classList.remove('btn-ghost');
+    const siralaBtn = document.querySelector('button[onclick*="liderlikYukle"]');
+    if (siralaBtn) { siralaBtn.classList.remove('btn-primary'); siralaBtn.classList.add('btn-ghost'); }
   } catch (e) {}
 }
 window.rozetlerimGoster = rozetlerimGoster;

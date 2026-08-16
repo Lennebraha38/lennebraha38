@@ -983,6 +983,14 @@ async function liderlikYukle() {
     const rozetKodlari = new Set(rozetler.map(r => r.kod));
     const konteyner = document.getElementById('liderlik-listesi');
     if (!konteyner) return;
+    konteyner.style.display = '';
+    const rozetKutusu = document.getElementById('rozetlerim-listesi');
+    if (rozetKutusu) rozetKutusu.style.display = 'none';
+    rozetlerimGoster._acik = false;
+    const rozetBtn = document.querySelector('button[onclick*="rozetlerimGoster"]');
+    if (rozetBtn) { rozetBtn.classList.remove('btn-primary'); rozetBtn.classList.add('btn-ghost'); }
+    const siralaBtn = document.querySelector('button[onclick*="liderlikYukle"]');
+    if (siralaBtn) { siralaBtn.classList.add('btn-primary'); siralaBtn.classList.remove('btn-ghost'); }
     if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">XP henüz toplanmadı — aktivitelerden XP kazan ve zirveye çık! 🏆</div>'; return; }
     const s = (await supabase.auth.getSession()).data.session;
     const ben = s?.user?.id;
@@ -1010,6 +1018,15 @@ async function rozetlerimGoster() {
         <div class="rozet-ikon">${tanimlar[k].split(' ')[0]}</div>
         <div class="rozet-ad">${tanimlar[k].split(' ').slice(1).join(' ')}</div>
       </div>`).join('');
+    konteyner.style.display = 'flex';
+    konteyner.style.flexWrap = 'wrap';
+    konteyner.style.gap = '.8rem';
+    document.getElementById('liderlik-listesi').style.display = 'none';
+    rozetlerimGoster._acik = true;
+    document.querySelector('button[onclick*="rozetlerimGoster"]').classList.add('btn-primary');
+    document.querySelector('button[onclick*="rozetlerimGoster"]').classList.remove('btn-ghost');
+    const siralaBtn = document.querySelector('button[onclick*="liderlikYukle"]');
+    if (siralaBtn) { siralaBtn.classList.remove('btn-primary'); siralaBtn.classList.add('btn-ghost'); }
   } catch (e) {}
 }
 window.rozetlerimGoster = rozetlerimGoster;

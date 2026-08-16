@@ -3157,6 +3157,13 @@
     .mentor-tanitim { font-size: .87rem; color: var(--text-dim, #7f93b5); line-height: 1.5; margin-bottom: .7rem; }
 
     .oy-satir { display: flex; align-items: center; gap: .7rem; margin-bottom: .55rem; font-size: .9rem; }
+    .oy-form { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; margin-bottom: .4rem; }
+    .oy-form input {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border, rgba(255,255,255,.12));
+      border-radius: 10px; padding: .65rem .85rem; color: var(--text, #e6edf7); font-size: .88rem; outline: none;
+      min-width: 160px; flex: 1;
+    }
+    .oy-form input:focus { border-color: var(--primary, #7c3aed); }
     .oy-bar { flex: 1; background: rgba(255,255,255,.07); height: 9px; border-radius: 999px; overflow: hidden; }
     .oy-bar div { height: 100%; background: linear-gradient(90deg, #7c3aed, #2563eb); border-radius: 999px; transition: width .5s; }
 
