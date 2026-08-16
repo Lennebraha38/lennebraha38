@@ -112,7 +112,45 @@
     </div>
   </section>
 
-  <div id="km-overlay" onclick="if(event.target===this)closeKM()">
+  <section id="basvuru-takip" style="padding:5rem 0 2rem;">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge-pill">Başvuru Takibi</div>
+        <h2>Yarışma Kayıtlarım</h2>
+        <p>Başvurduğun yarışmaları takip et, rapor tarihini kaçırma</p>
+      </div>
+
+      <div class="reveal" style="display:flex;justify-content:flex-end;margin-bottom:1.2rem;">
+        <button class="btn btn-primary" onclick="basvuruYeniModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Başvuru Ekle
+        </button>
+      </div>
+
+      <div id="basvuru-listesi" class="reveal"></div>
+    </div>
+  </section>
+
+  <section id="halk-oyu" style="padding:3rem 0;">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge-pill">Topluluk</div>
+        <h2>Halkın Seçimi Oylaması</h2>
+        <p>Takımına en iyi projeyi seçtir — demokratik yarışma</p>
+      </div>
+
+      <div class="reveal" style="max-width:520px;margin:0 auto 1.2rem;text-align:center;">
+        <div class="oy-form">
+          <input type="text" id="oy-yarisma" placeholder="Yarışma adı (örn: TEKNOFEST)">
+          <input type="text" id="oy-proje" placeholder="Proje adı">
+          <button class="btn btn-primary" onclick="oyFormVer()">🗳️ Oy Ver</button>
+        </div>
+        <div class="forum-bos" style="padding:1rem 0 0;font-size:.8rem;">Yarışma adı girince canlı sonuçlar yüklenir</div>
+      </div>
+
+      <div id="oy-sonuclari" class="reveal" style="max-width:520px;margin:0 auto;"></div>
+    </div>
+  </section>
     <div id="km-box">
       <div id="km-header">
         <div id="km-header-left">
@@ -274,7 +312,23 @@
     });
   </script>
 <script>
+window.oyFormVer = function() {
+  const yarisma = document.getElementById('oy-yarisma')?.value?.trim();
+  const proje = document.getElementById('oy-proje')?.value?.trim();
+  if (!yarisma || !proje) { showToast('⚠️ Yarışma ve proje adını doldur!'); return; }
+  oyVer(yarisma, proje);
+  setTimeout(() => oylarYukle(yarisma), 400);
+};
+function oyYukleDinle() {
+  const yarisma = document.getElementById('oy-yarisma')?.value?.trim();
+  if (yarisma) oylarYukle(yarisma);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('oy-yarisma');
+  if (input) input.addEventListener('change', oyYukleDinle);
+});
 initPage = async function() { if (typeof loadKategoriler === "function") await loadKategoriler(); };
+initVizyonPage = async function() { if (typeof basvuruYukle === "function") basvuruYukle(); };
 </script>
 <?php include __DIR__ . "/templates/shared/shared-js.php"; ?>
 </body></html>

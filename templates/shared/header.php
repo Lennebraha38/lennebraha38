@@ -154,10 +154,13 @@
           <a href="yarismalar.php">Yarışmalar</a>
           <a href="ilanlar.php">İlanlar</a>
           <a href="profiller.php">Profiller</a>
+          <a href="gorevler.php">Ekipler</a>
+          <a href="forum.php">Forum</a>
+          <a href="liderlik.php">Liderlik</a>
+          <a href="projeler.php">Projeler</a>
+          <a href="mentorlar.php">Mentorlar</a>
           <a href="takvim.php">Takvim</a>
-          <a href="gorevler.php">Görevler</a>
           <a href="iletisim.php">İletişim</a>
-          <a href="sss.php">SSS</a>
           <div class="nav-user-wrap" id="nav-user-wrap">
             <div class="nav-user-badge" id="nav-user-badge" onclick="toggleUserDropdown()" title="Profil Menüsü">
               <div class="nav-user-avatar" id="nav-user-avatar">?</div>
@@ -197,9 +200,13 @@
     <a href="yarismalar.php" onclick="closeMenu()">Yarışmalar</a>
     <a href="ilanlar.php" onclick="closeMenu()">İlanlar</a>
     <a href="profiller.php" onclick="closeMenu()">Profiller</a>
+    <a href="gorevler.php" onclick="closeMenu()">Ekipler</a>
+    <a href="forum.php" onclick="closeMenu()">Forum</a>
+    <a href="liderlik.php" onclick="closeMenu()">Liderlik</a>
+    <a href="projeler.php" onclick="closeMenu()">Projeler</a>
+    <a href="mentorlar.php" onclick="closeMenu()">Mentorlar</a>
     <a href="takvim.php" onclick="closeMenu()">Takvim</a>
     <a href="iletisim.php" onclick="closeMenu()">İletişim</a>
-    <a href="gorevler.php" onclick="closeMenu()">Görevler</a>
     <a href="sss.php" onclick="closeMenu()">SSS</a>
 
   </div>

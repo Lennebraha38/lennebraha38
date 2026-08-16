@@ -524,6 +524,7 @@ async function acceptDavet() {
     pendingDavetToken = null;
     closeModal('davet-kabul-modal');
     showToast(data === 'zaten_uye' ? 'Zaten bu ekiptesin!' : '🎉 Takıma katıldın!');
+    if (data !== 'zaten_uye') xpEkle('ekip-katil', 30);
     await loadEkipler();
     await loadGorevler(currentEkipFilter);
   } catch (err) {
@@ -593,6 +594,7 @@ async function createEkip() {
   closeModal('ekip-form-modal');
   await loadEkipler();
   showToast('Ekip oluşturuldu!');
+  xpEkle('ekip-kur', 30);
 }
 
 async function joinEkip(ekipId) {

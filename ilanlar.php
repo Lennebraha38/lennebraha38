@@ -43,6 +43,17 @@
     </div>
   </section>
 
+  <section id="basvurularim" style="padding:5rem 0 2rem;">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge-pill">Takip</div>
+        <h2>İlan Başvurularım</h2>
+        <p>Başvurduğun ilanların durumunu takip et</p>
+      </div>
+      <div id="ib-listesi" class="reveal"></div>
+    </div>
+  </section>
+
   <div class="ilan-form-overlay" id="ilan-form-overlay" onclick="closeIlanForm(event)">
     <div class="ilan-form-modal">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.6rem;">
@@ -210,6 +221,7 @@ initPage = async function() {
   if (typeof loadIlanlar === "function") await loadIlanlar();
   if (typeof overrideIlanFunctions === "function") overrideIlanFunctions();
 };
+initVizyonPage = async function() { if (typeof ilanBasvurularim === "function") ilanBasvurularim(); };
 </script>
 <?php include __DIR__ . "/templates/shared/shared-js.php"; ?>
 </body></html>

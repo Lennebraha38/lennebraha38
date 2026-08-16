@@ -74,13 +74,62 @@
 
   </header>
 
-
-
+  <section id="topluluk" style="padding:5rem 0;">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge-pill">Topluluk</div>
+        <h2>Topluluğa Katıl</h2>
+        <p>XP kazan, takım kur, projeni büyüt</p>
+      </div>
+      <div class="cards-grid reveal">
+        <div class="card-3d" style="cursor:pointer;" onclick="location.href='liderlik.php'">
+          <div class="card-icon">🏆</div>
+          <h3>Liderlik</h3>
+          <p>Aktivitelerden XP kazan, seviye atla ve rozetlerini topla. Topluluğun en aktif üyesi ol.</p>
+          <div class="liderlik-onizleme" id="liderlik-onizleme" style="margin:.6rem 0;font-size:.8rem;color:var(--text-dim);">Yükleniyor...</div>
+          <span class="card-link">Sıralamayı Gör <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+        </div>
+        <div class="card-3d" style="cursor:pointer;" onclick="location.href='forum.php'">
+          <div class="card-icon">💬</div>
+          <h3>Forum</h3>
+          <p>Yarışmalar, takımlar ve mentorluk üzerine tartış. Sorularına topluluktan cevap al.</p>
+          <span class="card-link">Forum'a Git <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+        </div>
+        <div class="card-3d" style="cursor:pointer;" onclick="location.href='projeler.php'">
+          <div class="card-icon">🚀</div>
+          <h3>Projeler</h3>
+          <p>Yarışma sonrası projeni kuluçkada büyüt: fikir → spec → MVP → yayın → yatırımcı.</p>
+          <span class="card-link">Projelerime Git <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+        </div>
+        <div class="card-3d" style="cursor:pointer;" onclick="location.href='mentorlar.php'">
+          <div class="card-icon">🎓</div>
+          <h3>Mentorlar</h3>
+          <p>Deneyimli üyelerden mentorluk al veya sen mentor ol. Tecrübelerini paylaş.</p>
+          <span class="card-link">Mentorları Gör <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+        </div>
+      </div>
+    </div>
+  </section>
 
 <?php include __DIR__ . "/templates/shared/footer.php"; ?>
 <script>
-// Home page - particle canvas, 3D sphere, custom cursor are in shared JS
-initPage = async function() {};
+async function liderlikOnizlemeYukle() {
+  try {
+    const { data } = await supabase.from('xp_toplam').select('kullanici_id, xp').order('xp', { ascending: false }).limit(3);
+    const el = document.getElementById('liderlik-onizleme');
+    if (!el) return;
+    if (!data || !data.length) { el.textContent = 'Henüz XP toplanmadı — ilk sen başla! ⚡'; return; }
+    const medals = ['🥇', '🥈', '🥉'];
+    el.innerHTML = data.map((k, i) => '<div style="display:flex;justify-content:space-between;gap:.5rem;padding:.15rem 0;"><span>'+medals[i]+' '+(k.kullanici_id === (window._qtUserId) ? 'Sen' : '#'+k.kullanici_id.slice(0,6))+'</span><b>'+k.xp+' XP</b></div>').join('');
+  } catch (e) {}
+}
+async function onizlemeKullaniciId() {
+  try { const s = (await supabase.auth.getSession()).data.session; window._qtUserId = s?.user?.id; } catch (e) {}
+}
+initPage = async function() {
+  onizlemeKullaniciId();
+  liderlikOnizlemeYukle();
+};
 </script>
 <?php include __DIR__ . "/templates/shared/shared-js.php"; ?>
 </body></html>

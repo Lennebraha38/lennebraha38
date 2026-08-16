@@ -89,6 +89,26 @@
           </div>
         </div>
 
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>XP ve rozetler nedir, ne işe yarar?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>Platformdaki aktivitelerinden XP kazanırsın: günlük giriş (5), profil oluşturma (50), yarışma kaydı (40), ekip kurma (30), proje ekleme (20), forum katılımı (10+5), ilan başvurusu (15) ve mentorluk (25). Her seviye bir öncekinin karesi kadar XP ister (Seviye 2 = 100 XP, Seviye 3 = 400 XP...). Rozetler belirli kilometre taşlarını (ilk ekip, ilk proje, 7 gün seri gibi) ödüllendirir. Liderlik sayfasından sıralamayı ve rozetlerini görebilirsin.</p>
+          </div>
+        </div>
+
+        <div class="sss-item">
+          <button class="sss-q" onclick="toggleSSS(this)">
+            <span>İlan başvurularımı nasıl takip ederim?</span>
+            <svg class="sss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="sss-a">
+            <p>İlanlar sayfasındaki "İlan Başvurularım" bölümünden başvurduğun ilanları ve durumlarını (yeni / görüldü / kabul / red) takip edebilirsin. İlan sahibi başvurunu gördüğünde durum güncellenir. Ayrıca profil sayfalarında "Mesaj" butonuyla üyelere doğrudan mesaj gönderebilirsin.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>

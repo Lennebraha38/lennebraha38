@@ -12,10 +12,15 @@
           <a href="yarismalar.php">Yarışmalar</a>
           <a href="ilanlar.php">İlanlar</a>
           <a href="takvim.php">Takvim</a>
-          <a href="gorevler.php">Görevler</a>
+          <a href="gorevler.php">Ekipler</a>
+          <a href="forum.php">Forum</a>
+          <a href="liderlik.php">Liderlik</a>
+          <a href="projeler.php">Projeler</a>
+          <a href="mentorlar.php">Mentorlar</a>
           <a href="iletisim.php">İletişim</a>
           <a href="profiller.php">Profiller</a>
           <a href="sss.php">SSS</a>
+          <a href="dogrula.php">Sertifika Doğrula</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -386,6 +391,10 @@
         <textarea class="form-control" id="pf-bio" rows="3" placeholder="Deneyimini, yarışma geçmişini ve aradığını kısaca anlat..."></textarea>
       </div>
       <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Takımda Arıyorum <span style="color:var(--text-dim);font-weight:400;">(eşleştirme için önemli)</span></label>
+        <input type="text" class="form-control" id="pf-ariyorum" placeholder="Örn: Python bilen, YOLO tecrübeli, robotik donanım">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
         <label class="form-label">İletişim (e-posta veya Discord)</label>
         <input type="text" class="form-control" id="pf-iletisim" placeholder="ornek@email.com veya discord#1234">
       </div>
@@ -412,4 +421,349 @@
   <!-- ===== PROFİL DETAY MODAL ===== -->
   <div class="profil-detail-overlay" id="profil-detail-overlay" onclick="if(event.target===this)closeProfilDetail()">
     <!-- İçerik JS ile doldurulur -->
+  </div>
+
+  <!-- ===== DM MODAL ===== -->
+  <div class="vz-overlay" id="dm-modal" onclick="if(event.target===this)closeDmModal()">
+    <div class="vz-modal">
+      <div class="vz-modal-head">
+        <h3>💬 Mesaj Gönder</h3>
+        <button class="ai-modal-close" onclick="closeDmModal()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="dm-alici">Kime: <b id="dm-alici-ad"></b></div>
+      <input type="hidden" id="dm-alici">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Mesajın</label>
+        <textarea class="form-control" id="dm-icerik" rows="4" placeholder="Merhaba, takımına katılmak istiyorum..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="gonderDm()">Gönder</button>
+    </div>
+  </div>
+
+  <!-- ===== FORUM YENİ KONU MODAL ===== -->
+  <div class="vz-overlay" id="forum-yeni-modal" onclick="if(event.target===this)forumYeniModalKapat()">
+    <div class="vz-modal">
+      <div class="vz-modal-head">
+        <h3>💬 Yeni Konu Aç</h3>
+        <button class="ai-modal-close" onclick="forumYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Başlık</label>
+        <input type="text" class="form-control" id="forum-baslik" placeholder="Konu başlığı...">
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Etiket</label>
+        <select class="form-control" id="forum-etiket">
+          <option value="genel">Genel</option>
+          <option value="yarisma">Yarışma</option>
+          <option value="takim">Takım</option>
+          <option value="mentorluk">Mentorluk</option>
+          <option value="duyuru">Duyuru</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">İçerik</label>
+        <textarea class="form-control" id="forum-icerik" rows="4" placeholder="Konunuzu anlatın..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="forumKonuEkle()">Yayınla</button>
+    </div>
+  </div>
+
+  <!-- ===== PROJE YENİ MODAL ===== -->
+  <div class="vz-overlay" id="proje-yeni-modal" onclick="if(event.target===this)projeYeniModalKapat()">
+    <div class="vz-modal">
+      <div class="vz-modal-head">
+        <h3>🚀 Yeni Proje</h3>
+        <button class="ai-modal-close" onclick="projeYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Proje Adı</label>
+        <input type="text" class="form-control" id="proje-ad" placeholder="Örn: Yapay Zeka Destekli Trafik Analizi">
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Etiketler <span style="color:var(--text-dim);font-weight:400;">(virgülle ayır)</span></label>
+        <input type="text" class="form-control" id="proje-etiketler" placeholder="AI, Görüntü İşleme, Python">
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Demo URL <span style="color:var(--text-dim);font-weight:400;">(opsiyonel)</span></label>
+        <input type="text" class="form-control" id="proje-demo" placeholder="https://...">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Açıklama</label>
+        <textarea class="form-control" id="proje-aciklama" rows="3" placeholder="Projenizi ve hedefinizi anlatın..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="projeKaydet()">Projeyi Ekle</button>
+    </div>
+  </div>
+
+  <!-- ===== MENTOR YENİ MODAL ===== -->
+  <div class="vz-overlay" id="mentor-yeni-modal" onclick="if(event.target===this)mentorYeniModalKapat()">
+    <div class="vz-modal">
+      <div class="vz-modal-head">
+        <h3>🎓 Mentor Profili Oluştur</h3>
+        <button class="ai-modal-close" onclick="mentorYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Ad Soyad</label>
+        <input type="text" class="form-control" id="mentor-ad" placeholder="Adın Soyadın">
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Unvan</label>
+        <input type="text" class="form-control" id="mentor-unvan" placeholder="Örn: Yapay Zeka Mühendisi @ Roketsan">
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Uzmanlık Alanları <span style="color:var(--text-dim);font-weight:400;">(virgülle ayır)</span></label>
+        <input type="text" class="form-control" id="mentor-alanlar" placeholder="Yapay Zeka, Görüntü İşleme, Gömülü Sistem">
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Deneyim</label>
+        <input type="text" class="form-control" id="mentor-deneyim" placeholder="5 yıl · TEKNOFEST jüri üyeliği · 3 takım şampiyonluğu">
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Müsaitlik</label>
+        <input type="text" class="form-control" id="mentor-musait" placeholder="Haftada 2 saat · Çevrimiçi">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Tanıtım</label>
+        <textarea class="form-control" id="mentor-tanitim" rows="3" placeholder="Nelerde yardımcı olabilirsiniz?"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="mentorKaydet()">Mentor Ol</button>
+    </div>
+  </div>
+
+  <!-- ===== MENTOR TALEP MODAL ===== -->
+  <div class="vz-overlay" id="mentor-talep-modal" onclick="if(event.target===this)mentorTalepKapat()">
+    <div class="vz-modal">
+      <div class="vz-modal-head">
+        <h3>🎓 Mentorluk Talebi</h3>
+        <button class="ai-modal-close" onclick="mentorTalepKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <input type="hidden" id="mentor-talep-id">
+      <div class="dm-alici">Mentor: <b id="mentor-talep-ad"></b></div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Mesajın</label>
+        <textarea class="form-control" id="mentor-talep-mesaj" rows="4" placeholder="Neyde yardım istiyorsun? Hangi yarışmaya hazırlanıyorsun?"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="mentorTalepGonder()">Talebi Gönder</button>
+    </div>
+  </div>
+
+  <!-- ===== BAŞVURU YENİ MODAL ===== -->
+  <div class="vz-overlay" id="basvuru-yeni-modal" onclick="if(event.target===this)basvuruYeniModalKapat()">
+    <div class="vz-modal">
+      <div class="vz-modal-head">
+        <h3>📋 Yarışma Başvuru Kaydı</h3>
+        <button class="ai-modal-close" onclick="basvuruYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:.8rem;">
+        <label class="form-label">Yarışma Adı</label>
+        <input type="text" class="form-control" id="basvuru-yarisma" placeholder="Örn: TEKNOFEST 2026">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kategori</label>
+          <input type="text" class="form-control" id="basvuru-kategori" placeholder="Örn: İnsansız Hava Aracı">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Takım Adı</label>
+          <input type="text" class="form-control" id="basvuru-takim" placeholder="Örn: KartalTakımı">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Rapor Tarihi</label>
+        <input type="date" class="form-control" id="basvuru-rapor">
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="basvuruKaydet()">Kaydet</button>
+    </div>
+  </div>
+
+  <!-- ===== İLAN BAŞVURU MODAL ===== -->
+  <div class="vz-overlay" id="ilan-basvuru-modal" onclick="if(event.target===this)ilanBasvuruKapat()">
+    <div class="vz-modal">
+      <div class="vz-modal-head">
+        <h3>📮 İlana Başvur</h3>
+        <button class="ai-modal-close" onclick="ilanBasvuruKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <input type="hidden" id="ib-iland-id">
+      <div class="dm-alici">İlan: <b id="ib-iland-ad"></b></div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Neden sen? <span style="color:var(--text-dim);font-weight:400;">(opsiyonel)</span></label>
+        <textarea class="form-control" id="ib-mesaj" rows="4" placeholder="Becerilerini ve deneyimini kısaca anlat..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="ilanBasvuruGonder()">Başvur</button>
+    </div>
+  </div>
+
+  <!-- ===== VİZYON XP TOAST ===== -->
+  <div id="vizyon-toast"></div>
+
+  <!-- ===== VIZYON MODALLARI ===== -->
+  <div id="vizyon-toast" aria-live="polite"></div>
+
+  <!-- DM MESAJ MODAL -->
+  <div class="vizyon-overlay" id="dm-modal" onclick="if(event.target===this)window.closeDmModal()">
+    <div class="vizyon-card">
+      <div class="vizyon-card-baslik">
+        <h3>💬 Mesaj Gönder</h3>
+        <button class="ai-modal-close" onclick="window.closeDmModal()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <p class="vizyon-alici">Kime: <b id="dm-alici-ad"></b></p>
+      <input type="hidden" id="dm-alici">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <textarea class="form-control" id="dm-icerik" rows="4" placeholder="Mesajını yaz... (Gmail üzerinden alıcıya iletilecektir)"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.gonderDm()">Gönder</button>
+    </div>
+  </div>
+
+  <!-- FORUM YENİ KONU MODAL -->
+  <div class="vizyon-overlay" id="forum-yeni-modal" onclick="if(event.target===this)window.forumYeniModalKapat()">
+    <div class="vizyon-card">
+      <div class="vizyon-card-baslik">
+        <h3>💬 Yeni Konu</h3>
+        <button class="ai-modal-close" onclick="window.forumYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Başlık</label>
+        <input type="text" class="form-control" id="forum-baslik" placeholder="Konu başlığı...">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Etiket</label>
+        <select class="form-control" id="forum-etiket">
+          <option value="genel">Genel</option>
+          <option value="yarisma">Yarışma</option>
+          <option value="takim">Takım</option>
+          <option value="mentorluk">Mentorluk</option>
+          <option value="duyuru">Duyuru</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">İçerik</label>
+        <textarea class="form-control" id="forum-icerik" rows="4" placeholder="Sorunu, deneyimini ya da duyurunu paylaş..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.forumKonuEkle()">Yayınla (+10 XP)</button>
+    </div>
+  </div>
+
+  <!-- PROJE YENİ MODAL -->
+  <div class="vizyon-overlay" id="proje-yeni-modal" onclick="if(event.target===this)window.projeYeniModalKapat()">
+    <div class="vizyon-card">
+      <div class="vizyon-card-baslik">
+        <h3>🚀 Yeni Proje</h3>
+        <button class="ai-modal-close" onclick="window.projeYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Proje Adı</label>
+        <input type="text" class="form-control" id="proje-ad" placeholder="Örn: Otonom Tarım Robotu">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Açıklama</label>
+        <textarea class="form-control" id="proje-aciklama" rows="3" placeholder="Projeni ve hedefini anlat..."></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Etiketler <span style="color:var(--text-dim);font-weight:400;">(virgülle)</span></label>
+        <input type="text" class="form-control" id="proje-etiketler" placeholder="robotik, python, tarım">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Demo / Video Linki</label>
+        <input type="text" class="form-control" id="proje-demo" placeholder="https://...">
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.projeKaydet()">Kaydet (+20 XP)</button>
+    </div>
+  </div>
+
+  <!-- MENTOR YENİ MODAL -->
+  <div class="vizyon-overlay" id="mentor-yeni-modal" onclick="if(event.target===this)window.mentorYeniModalKapat()">
+    <div class="vizyon-card">
+      <div class="vizyon-card-baslik">
+        <h3>🎓 Mentor Ol</h3>
+        <button class="ai-modal-close" onclick="window.mentorYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Ad Soyad</label>
+        <input type="text" class="form-control" id="mentor-ad" placeholder="Adın Soyadın">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Unvan</label>
+        <input type="text" class="form-control" id="mentor-unvan" placeholder="Örn: Kıdemli Makine Öğrenmesi Mühendisi">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Alanlar <span style="color:var(--text-dim);font-weight:400;">(virgülle)</span></label>
+        <input type="text" class="form-control" id="mentor-alanlar" placeholder="yapay zeka, robotik, girişimcilik">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Deneyim</label>
+        <input type="text" class="form-control" id="mentor-deneyim" placeholder="5+ yıl, 3 yarışma birinciliği...">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Müsaitlik</label>
+        <input type="text" class="form-control" id="mentor-musait" placeholder="Hafta içi akşam, 2 saat">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Tanıtım</label>
+        <textarea class="form-control" id="mentor-tanitim" rows="3" placeholder="Kimlere nasıl yardım edebilirsin?"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.mentorKaydet()">Kaydet (+25 XP)</button>
+    </div>
+  </div>
+
+  <!-- MENTOR TALEP MODAL -->
+  <div class="vizyon-overlay" id="mentor-talep-modal" onclick="if(event.target===this)window.mentorTalepKapat()">
+    <div class="vizyon-card">
+      <div class="vizyon-card-baslik">
+        <h3>🎓 Mentorluk İste</h3>
+        <button class="ai-modal-close" onclick="window.mentorTalepKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <p class="vizyon-alici">Mentor: <b id="mentor-talep-ad"></b></p>
+      <input type="hidden" id="mentor-talep-id">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <textarea class="form-control" id="mentor-talep-mesaj" rows="4" placeholder="Projeni ve neden mentorluk istediğini anlat..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.mentorTalepGonder()">Talebi Gönder</button>
+    </div>
+  </div>
+
+  <!-- YARISMA BASVURU TAKIP MODAL -->
+  <div class="vizyon-overlay" id="basvuru-yeni-modal" onclick="if(event.target===this)window.basvuruYeniModalKapat()">
+    <div class="vizyon-card">
+      <div class="vizyon-card-baslik">
+        <h3>📋 Yarışma Kaydı Ekle</h3>
+        <button class="ai-modal-close" onclick="window.basvuruYeniModalKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Yarışma Adı</label>
+        <input type="text" class="form-control" id="basvuru-yarisma" placeholder="Örn: TEKNOFEST İnsansız Su Altı Sistemleri">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Kategori</label>
+          <input type="text" class="form-control" id="basvuru-kategori" placeholder="Takım Kaptanı">
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Takım Adı</label>
+          <input type="text" class="form-control" id="basvuru-takim" placeholder="Takımın">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Rapor Tarihi</label>
+        <input type="date" class="form-control" id="basvuru-rapor">
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.basvuruKaydet()">Kaydet (+40 XP)</button>
+    </div>
+  </div>
+
+  <!-- ILAN BASVURU MODAL -->
+  <div class="vizyon-overlay" id="ilan-basvuru-modal" onclick="if(event.target===this)window.ilanBasvuruKapat()">
+    <div class="vizyon-card">
+      <div class="vizyon-card-baslik">
+        <h3>📮 İlana Başvur</h3>
+        <button class="ai-modal-close" onclick="window.ilanBasvuruKapat()" aria-label="Kapat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <p class="vizyon-alici">İlan: <b id="ib-iland-ad"></b></p>
+      <input type="hidden" id="ib-iland-id">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <textarea class="form-control" id="ib-mesaj" rows="4" placeholder="Neden bu ilana başvuruyorsun? Deneyimini anlat..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.ilanBasvuruGonder()">Başvur (+15 XP)</button>
+    </div>
   </div>

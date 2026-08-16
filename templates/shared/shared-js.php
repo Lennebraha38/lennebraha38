@@ -195,15 +195,23 @@ function createProfilCardElement(p) {
   card.className = 'profil-card';
   card.dataset.name = fullName; card.dataset.alan = p.alan||''; card.dataset.sehir = p.sehir||'';
   card.dataset.iletisim = p.iletisim||''; card.dataset.saat = p.saat||''; card.dataset.uni = p.universite||'';
+  card.dataset.eposta = p.eposta||'';
+  card.dataset.ariyorum = p.ariyorum||'';
   card.dataset.avatar = p.avatar_url||''; card.dataset.color = color; card.dataset.initials = initials; card.dataset.id = p.id;
+  const ariyorRozet = p.ariyorum ? '<div class="profil-ariyor" title="Takımda arıyor"><span>🧲</span>'+(p.ariyorum.length > 80 ? p.ariyorum.slice(0,80)+'…' : p.ariyorum)+'</div>' : '';
+  const alanlar = [p.isim, p.bio, p.yetenekler, p.sehir, p.universite, p.iletisim, p.alan, p.saat];
+  const tamamlik = Math.round(alanlar.filter(Boolean).length / alanlar.length * 100);
   card.innerHTML = (p.avatar_url
     ? '<div class="profil-avatar"><img src="'+p.avatar_url+'" alt="'+fullName+'"></div>'
     : '<div class="profil-avatar" style="background:'+color+';">'+initials+'</div>')+
     '<div class="profil-info"><div class="profil-info-name">'+fullName+'</div><div class="profil-info-role">'+(p.universite||'')+'</div></div>'+
     '<div class="profil-available"><span></span>'+(p.musaitlik||'Müsait')+'</div>'+
+    ariyorRozet+
     '<div class="profil-bio">'+(p.bio||'')+'</div><div class="profil-skills">'+skillTags+'</div>'+
     '<div class="profil-meta"><span>📍 '+(p.sehir||'—')+'</span><span>⏰ '+(p.saat||'—')+'</span></div>'+
+    '<div class="profil-tamamlama" title="Profil tamamlama"><div class="pt-bar"><div style="width:'+tamamlik+'%"></div></div><span>%'+tamamlik+'</span></div>'+
     '<div class="profil-actions"><button class="btn btn-primary btn-sm" onclick="openProfilDetail(this.closest(\'.profil-card\'))" style="flex:1.4">Profili Gör</button>'+
+    (p.eposta ? '<button class="btn btn-ghost btn-sm" onclick="openDmModal(\''+p.eposta+'\', \''+fullName.replace(/'/g, '’')+'\')" title="Mesaj gönder">Mesaj</button>' : '')+
     '<button class="btn btn-secondary btn-sm" onclick="editProfilCard(this)">Düzenle</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="deleteProfilCard(this)" style="color:#f87171;border-color:rgba(239,68,68,0.2)">Sil</button></div>';
   return card;
@@ -245,7 +253,8 @@ async function supabaseCreateProfil(fd, avatarFile) {
   const { data, error } = await supabase.from('profiller').insert({
     user_id: session?.user?.id, isim: fd.isim, eposta: session?.user?.email, bio: fd.bio,
     yetenekler: fd.yetenekler, sehir: fd.sehir, musaitlik: 'Müsait', avatar_url: avatarUrl,
-    iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat
+    iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat,
+    ariyorum: fd.ariyorum
   }).select().single();
   if (error) { console.error(error.message); if (typeof showToast==='function') showToast('⚠️ Profil oluşturulamadı!'); return null; }
   return data;
@@ -264,7 +273,8 @@ async function supabaseUpdateProfil(id, fd, avatarFile) {
   }
   const { error } = await supabase.from('profiller').update({
     isim: fd.isim, bio: fd.bio, yetenekler: fd.yetenekler, sehir: fd.sehir,
-    avatar_url: avatarUrl, iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat
+    avatar_url: avatarUrl, iletisim: fd.iletisim, universite: fd.universite, alan: fd.alan, saat: fd.saat,
+    ariyorum: fd.ariyorum
   }).eq('id', id);
   if (error) { console.error(error.message); if (typeof showToast==='function') showToast('⚠️ Profil güncellenemedi!'); return null; }
   return { id };
@@ -281,6 +291,7 @@ function overrideProfilFunctions() {
     const bio = document.getElementById('pf-bio')?.value?.trim();
     const iletisim = document.getElementById('pf-iletisim')?.value?.trim();
     const saat = document.getElementById('pf-saat')?.value;
+    const ariyorum = document.getElementById('pf-ariyorum')?.value?.trim() || '';
     const isim = ad+' '+soyad;
     if (!ad || !soyad || !bio || !skills || !iletisim) { if (typeof showToast==='function') showToast('⚠️ Zorunlu alanları doldurun!'); return; }
     const session = (await supabase.auth.getSession()).data.session;
@@ -288,8 +299,8 @@ function overrideProfilFunctions() {
     const editId = window._editProfilId || null;
     const avatarFile = window._pfAvatarFile || null;
     const r = editId
-      ? await supabaseUpdateProfil(editId, { isim, bio, yetenekler: skills, sehir, iletisim, universite: uni, alan, saat: saat||'Esnek', avatar_url: (document.getElementById('avatar-preview')?.src || '') }, avatarFile)
-      : await supabaseCreateProfil({ isim, bio, yetenekler: skills, sehir, iletisim, universite: uni, alan, saat: saat||'Esnek' }, avatarFile);
+      ? await supabaseUpdateProfil(editId, { isim, bio, yetenekler: skills, sehir, iletisim, universite: uni, alan, saat: saat||'Esnek', avatar_url: (document.getElementById('avatar-preview')?.src || ''), ariyorum }, avatarFile)
+      : await supabaseCreateProfil({ isim, bio, yetenekler: skills, sehir, iletisim, universite: uni, alan, saat: saat||'Esnek', ariyorum }, avatarFile);
     if (r) {
       window._pfAvatarFile = null;
       window._editProfilId = null;
@@ -421,6 +432,605 @@ document.documentElement.setAttribute('data-theme', 'dark');
 const logos = document.querySelectorAll('.theme-logo');
 logos.forEach(img => { img.src = 'logo-beyaz.png'; });
 
+// ===== VIZYON MODULU — XP / Rozet / Eslesme / DM / Forum / Proje / Mentor / Oylama / Sertifika =====
+function qtId(ad) { return ad.toLowerCase().replace(/[^a-z0-9çğıöşü]+/g, '-').replace(/^-+|-+$/g, ''); }
+function seviyeHesapla(xp) { return Math.floor(Math.sqrt(Math.max(0, xp) / 100)) + 1; }
+function seviyeIlerleme(xp) { const s = seviyeHesapla(xp); const taban = 100 * (s - 1) * (s - 1); const hedef = 100 * s * s; return Math.min(100, Math.round(((xp - taban) / (hedef - taban)) * 100)); }
+
+async function xpEkle(olay, puan) {
+  try {
+    const r = await supabase.rpc('xp_ekle', { p_olay: olay, p_xp: puan });
+    if (r.data === 'OK') { qtVizyonBildirim('+'+puan+' XP · ' + (window.QT_XP_ADI || olay)); return true; }
+  } catch (e) {}
+  return false;
+}
+async function rozetVer(kod) { try { await supabase.rpc('rozet_ver', { p_kod: kod }); } catch (e) {} }
+
+function qtVizyonBildirim(metin) {
+  let el = document.getElementById('vizyon-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'vizyon-toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = metin;
+  el.classList.add('show');
+  clearTimeout(window.__vtTimer);
+  window.__vtTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+async function rozetlerim() {
+  try { const { data } = await supabase.from('rozetler').select('kod').eq('kullanici_id', (await supabase.auth.getUser()).data.user?.id); return data || []; } catch (e) { return []; }
+}
+async function xpToplamim() {
+  try { const { data } = await supabase.from('xp_toplam').select('xp').eq('kullanici_id', (await supabase.auth.getUser()).data.user?.id).single(); return data?.xp || 0; } catch (e) { return 0; }
+}
+
+async function initVizyon() {
+  const oturum = (await supabase.auth.getSession()).data.session;
+  if (!oturum) return;
+  xpEkle('gunluk-giris', 5);
+  // Nav rozet: okunmamis DM
+  try {
+    const { count } = await supabase.from('dm_mesajlari').select('id', { count: 'exact', head: true }).eq('alici_email', oturum.user.email).eq('okundu', false);
+    const rozet = document.getElementById('dm-bildirim-rozet');
+    if (rozet) { rozet.textContent = count || ''; rozet.style.display = count ? 'flex' : 'none'; }
+  } catch (e) {}
+  if (typeof initVizyonPage === 'function') initVizyonPage();
+}
+
+// ---- PROFIL ESLEŞTIRME (Aptex modeli: "eksigi kapanla esle") ----
+function profilUyumSkoru(profil, aranan) {
+  let puan = 0;
+  const ariyorum = (profil.ariyorum || '').toLowerCase();
+  const beceriler = (profil.yetenekler || '').toLowerCase();
+  const arananKelimeler = (aranan || '').toLowerCase().split(/[\s,;]+/).filter(Boolean);
+  arananKelimeler.forEach(k => {
+    if (beceriler.includes(k)) puan += 3;
+    if (ariyorum.includes(k)) puan += 2;
+  });
+  if (puan > 0 && profil.musaitlik === 'Müsait') puan += 1;
+  return puan;
+}
+
+// ---- DM ----
+async function dmGonder(aliciEmail, icerik) {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return false; }
+    if (!icerik.trim()) { showToast('⚠️ Mesaj boş olamaz!'); return false; }
+    const { error } = await supabase.from('dm_mesajlari').insert({ gonderen_id: s.user.id, alici_email: aliciEmail, icerik });
+    if (error) { console.error(error.message); showToast('⚠️ Mesaj gönderilemedi!'); return false; }
+    showToast('✅ Mesaj gönderildi!');
+    return true;
+  } catch (e) { showToast('⚠️ Mesaj gönderilemedi!'); return false; }
+}
+async function dmKonusmam(aliciEmail) {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) return [];
+    const { data } = await supabase.from('dm_mesajlari').select('*')
+      .or(`and(gonderen_id.eq.${s.user.id},alici_email.eq.${aliciEmail}),and(gonderen_id.neq.${s.user.id},alici_email.eq.${s.user.email},gonderen_id.in.(${(await supabase.from('dm_mesajlari').select('gonderen_id').eq('alici_email', aliciEmail)).data?.map(m => "'" + m.gonderen_id + "'").join(',') || "'____'"})`);
+    return (data || []).sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+  } catch (e) { return []; }
+}
+window.dmGonder = dmGonder;
+window.openDmModal = function(aliciEmail, aliciAd) {
+  const m = document.getElementById('dm-modal');
+  if (!m) return;
+  document.getElementById('dm-alici').value = aliciEmail;
+  document.getElementById('dm-alici-ad').textContent = aliciAd || aliciEmail;
+  document.getElementById('dm-icerik').value = '';
+  m.classList.add('open');
+};
+window.closeDmModal = function() { const m = document.getElementById('dm-modal'); if (m) m.classList.remove('open'); };
+window.gonderDm = async function() {
+  const alici = document.getElementById('dm-alici')?.value;
+  const icerik = document.getElementById('dm-icerik')?.value;
+  if (await dmGonder(alici, icerik)) window.closeDmModal();
+};
+
+// ---- FORUM ----
+const FORUM_ETIKETLER = { 'genel': 'Genel', 'yarisma': 'Yarışma', 'takim': 'Takım', 'mentorluk': 'Mentorluk', 'duyuru': 'Duyuru' };
+async function forumYukle(etiket = 'genel') {
+  try {
+    let q = supabase.from('forum_konulari').select('*').order('tarih', { ascending: false }).limit(60);
+    if (etiket) q = q.eq('etiket', etiket);
+    const { data, error } = await q;
+    if (error) throw error;
+    const konteyner = document.getElementById('forum-konu-listesi');
+    if (!konteyner) return;
+    if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">Henüz konu yok — ilk konuyu sen aç! 🚀</div>'; return; }
+    konteyner.innerHTML = data.map(k => `
+      <div class="forum-konu" onclick="forumDetayYukle(${k.id})">
+        <div class="forum-konu-etiket">${FORUM_ETIKETLER[k.etiket] || k.etiket}</div>
+        <div class="forum-konu-baslik">${k.baslik}</div>
+        <div class="forum-konu-meta">${k.cevap_sayisi} cevap · ${new Date(k.tarih).toLocaleDateString('tr-TR')}</div>
+      </div>`).join('');
+  } catch (e) { console.error(e.message); }
+}
+window.forumYukle = forumYukle;
+window.forumEtiketSec = function(el, etiket) {
+  document.querySelectorAll('.forum-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  forumYukle(etiket);
+};
+window.forumYeniKonuModal = function() { const m = document.getElementById('forum-yeni-modal'); if (m) m.classList.add('open'); };
+window.forumYeniModalKapat = function() { const m = document.getElementById('forum-yeni-modal'); if (m) m.classList.remove('open'); };
+window.forumKonuEkle = async function() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return; }
+    const baslik = document.getElementById('forum-baslik')?.value?.trim();
+    const icerik = document.getElementById('forum-icerik')?.value?.trim();
+    const etiket = document.getElementById('forum-etiket')?.value || 'genel';
+    if (!baslik) { showToast('⚠️ Başlık gerekli!'); return; }
+    const { error } = await supabase.from('forum_konulari').insert({ baslik, icerik, kullanici_id: s.user.id, etiket });
+    if (error) { console.error(error.message); showToast('⚠️ Konu açılamadı!'); return; }
+    window.forumYeniModalKapat();
+    forumYukle(etiket);
+    showToast('✅ Konu yayınlandı!');
+    xpEkle('forum-konu', 10);
+  } catch (e) { showToast('⚠️ Konu açılamadı!'); }
+};
+window.forumDetayYukle = async function(konuId) {
+  try {
+    const { data: konu } = await supabase.from('forum_konulari').select('*').eq('id', konuId).single();
+    const { data: cevaplar } = await supabase.from('forum_cevaplari').select('*').eq('konu_id', konuId).order('tarih', { ascending: true });
+    if (!konu) return;
+    const list = document.getElementById('forum-konu-listesi');
+    list.innerHTML = `
+      <div class="forum-detay">
+        <button class="btn btn-ghost" onclick="forumGeriDon()">← Geri</button>
+        <h3 class="forum-detay-baslik">${konu.baslik}</h3>
+        <div class="forum-detay-icerik">${(konu.icerik || '').replace(/\n/g, '<br>')}</div>
+        <div class="forum-cevaplar">${(cevaplar || []).map(c => `
+          <div class="forum-cevap">
+            <div class="forum-cevap-icerik">${c.icerik.replace(/\n/g, '<br>')}</div>
+            <div class="forum-cevap-tarih">${new Date(c.tarih).toLocaleString('tr-TR')}</div>
+          </div>`).join('') || '<div class="forum-bos">Henüz cevap yok.</div>'}
+        </div>
+        <div class="forum-cevap-form">
+          <input type="text" id="forum-cevap-icerik" placeholder="Cevabını yaz..." onkeydown="if(event.key==='Enter')forumCevapEkle(${konuId})">
+          <button class="btn btn-primary" onclick="forumCevapEkle(${konuId})">Gönder</button>
+        </div>
+      </div>`;
+  } catch (e) { console.error(e.message); }
+};
+window.forumGeriDon = function() { forumYukle(); };
+window.forumCevapEkle = async function(konuId) {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return; }
+    const icerik = document.getElementById('forum-cevap-icerik')?.value?.trim();
+    if (!icerik) { showToast('⚠️ Cevap boş olamaz!'); return; }
+    const { error } = await supabase.from('forum_cevaplari').insert({ konu_id: konuId, icerik, kullanici_id: s.user.id });
+    if (error) { console.error(error.message); showToast('⚠️ Cevap gönderilemedi!'); return; }
+    await supabase.from('forum_konulari').update({ cevap_sayisi: (await supabase.from('forum_konulari').select('cevap_sayisi').eq('id', konuId).single()).data.cevap_sayisi + 1 }).eq('id', konuId);
+    forumDetayYukle(konuId);
+    xpEkle('forum-cevap', 5);
+  } catch (e) { showToast('⚠️ Cevap gönderilemedi!'); }
+};
+
+// ---- PROJELER (post-event kuluçka) ----
+const PROJE_ASAMALARI = [
+  ['fikir', '💡 Fikir'],
+  ['spec', '📋 Spec / Tasarım'],
+  ['mvp', '🛠️ MVP'],
+  ['yayinda', '🚀 Yayında'],
+  ['yatirimci', '💎 Yatırımcı']
+];
+async function projeYukle() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) return;
+    const { data, error } = await supabase.from('projeler').select('*').eq('kullanici_id', s.user.id).order('guncelleme', { ascending: false });
+    if (error) throw error;
+    const konteyner = document.getElementById('proje-listesi');
+    if (!konteyner) return;
+    if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">Henüz proje yok — yarışma sonrası projeni burada büyüt! 🚀</div>'; return; }
+    konteyner.innerHTML = data.map(p => {
+      const asamaIdx = PROJE_ASAMALARI.findIndex(a => a[0] === p.asama);
+      return `
+      <div class="proje-kart">
+        <div class="proje-kart-ust">
+          <h4>${p.ad}</h4>
+          <div class="proje-asama">${PROJE_ASAMALARI[asamaIdx][1]}</div>
+        </div>
+        <div class="proje-asama-cubuk">${PROJE_ASAMALARI.map((a, i) => `<div class="pa-${i <= asamaIdx ? 'dolu' : 'bos'}"></div>`).join('')}</div>
+        <p class="proje-aciklama">${p.aciklama || ''}</p>
+        <div class="proje-kart-alt">
+          ${p.demo_url ? `<a class="btn btn-ghost" target="_blank" href="${p.demo_url}">Demo</a>` : ''}
+          <button class="btn btn-ghost" onclick="projeAsamaGuncelle(${p.id})">Aşama İlerlet</button>
+          <button class="btn btn-danger-ghost" onclick="projeSil(${p.id})">Sil</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) { console.error(e.message); }
+}
+window.projeYukle = projeYukle;
+window.projeYeniModal = function() { const m = document.getElementById('proje-yeni-modal'); if (m) m.classList.add('open'); };
+window.projeYeniModalKapat = function() { const m = document.getElementById('proje-yeni-modal'); if (m) m.classList.remove('open'); };
+window.projeKaydet = async function() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return; }
+    const ad = document.getElementById('proje-ad')?.value?.trim();
+    if (!ad) { showToast('⚠️ Proje adı gerekli!'); return; }
+    const { error } = await supabase.from('projeler').insert({
+      kullanici_id: s.user.id, ad,
+      aciklama: document.getElementById('proje-aciklama')?.value?.trim() || '',
+      etiketler: document.getElementById('proje-etiketler')?.value?.trim() || '',
+      demo_url: document.getElementById('proje-demo')?.value?.trim() || '',
+      asama: 'fikir'
+    });
+    if (error) { console.error(error.message); showToast('⚠️ Proje kaydedilemedi!'); return; }
+    window.projeYeniModalKapat();
+    projeYukle();
+    xpEkle('proje-ekle', 20);
+    showToast('✅ Proje eklendi!');
+  } catch (e) { showToast('⚠️ Proje kaydedilemedi!'); }
+};
+window.projeAsamaGuncelle = async function(id) {
+  try {
+    const { data } = await supabase.from('projeler').select('asama').eq('id', id).single();
+    const idx = PROJE_ASAMALARI.findIndex(a => a[0] === data.asama);
+    if (idx >= PROJE_ASAMALARI.length - 1) { showToast('🏆 Zirvedesin — proje tamam!'); return; }
+    await supabase.from('projeler').update({ asama: PROJE_ASAMALARI[idx + 1][0], guncelleme: new Date().toISOString() }).eq('id', id);
+    projeYukle();
+    xpEkle('proje-asama', 15);
+    showToast('✅ Aşama ilerletildi!');
+  } catch (e) { showToast('⚠️ Güncellenemedi!'); }
+};
+window.projeSil = async function(id) {
+  if (!confirm('Projeyi silmek istiyor musun?')) return;
+  try { await supabase.from('projeler').delete().eq('id', id); projeYukle(); } catch (e) { showToast('⚠️ Silinemedi!'); }
+};
+
+// ---- MENTORLAR ----
+async function mentorYukle() {
+  try {
+    const { data, error } = await supabase.from('mentorlar').select('*').order('tarih', { ascending: false });
+    if (error) throw error;
+    const konteyner = document.getElementById('mentor-listesi');
+    if (!konteyner) return;
+    if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">Henüz mentor yok — ilk mentor sen ol! 🎓</div>'; return; }
+    konteyner.innerHTML = data.map(m => `
+      <div class="mentor-kart">
+        <div class="mentor-avatar">${m.ad.charAt(0)}</div>
+        <div class="mentor-bilgi">
+          <h4>${m.ad}</h4>
+          <div class="mentor-unvan">${m.unvan || ''}</div>
+          <div class="mentor-alanlar">${(m.alanlar || '').split(',').map(a => `<span class="mentor-alan">${a.trim()}</span>`).join('')}</div>
+          <p class="mentor-tanitim">${m.tanitim || ''}</p>
+          <div class="mentor-kart-alt">
+            <button class="btn btn-primary" onclick="mentorTalebiModal(${m.id}, '${m.ad.replace(/'/g, "\\'")}')">Mentorluk İste</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch (e) { console.error(e.message); }
+}
+window.mentorYukle = mentorYukle;
+window.mentorYeniModal = function() { const m = document.getElementById('mentor-yeni-modal'); if (m) m.classList.add('open'); };
+window.mentorYeniModalKapat = function() { const m = document.getElementById('mentor-yeni-modal'); if (m) m.classList.remove('open'); };
+window.mentorKaydet = async function() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return; }
+    const ad = document.getElementById('mentor-ad')?.value?.trim();
+    if (!ad) { showToast('⚠️ Ad gerekli!'); return; }
+    const { error } = await supabase.from('mentorlar').insert({
+      kullanici_id: s.user.id, ad,
+      unvan: document.getElementById('mentor-unvan')?.value?.trim() || '',
+      alanlar: document.getElementById('mentor-alanlar')?.value?.trim() || '',
+      deneyim: document.getElementById('mentor-deneyim')?.value?.trim() || '',
+      tanitim: document.getElementById('mentor-tanitim')?.value?.trim() || '',
+      musait: document.getElementById('mentor-musait')?.value?.trim() || '',
+      onayli: false
+    });
+    if (error) { console.error(error.message); showToast('⚠️ Mentor kaydedilemedi!'); return; }
+    window.mentorYeniModalKapat();
+    mentorYukle();
+    xpEkle('mentor-ol', 25);
+    showToast('✅ Mentor profili oluşturuldu!');
+  } catch (e) { showToast('⚠️ Mentor kaydedilemedi!'); }
+};
+window.mentorTalebiModal = function(id, ad) {
+  const m = document.getElementById('mentor-talep-modal');
+  if (!m) return;
+  document.getElementById('mentor-talep-id').value = id;
+  document.getElementById('mentor-talep-ad').textContent = ad;
+  document.getElementById('mentor-talep-mesaj').value = '';
+  m.classList.add('open');
+};
+window.mentorTalepKapat = function() { const m = document.getElementById('mentor-talep-modal'); if (m) m.classList.remove('open'); };
+window.mentorTalepGonder = async function() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return; }
+    const id = parseInt(document.getElementById('mentor-talep-id')?.value);
+    const mesaj = document.getElementById('mentor-talep-mesaj')?.value?.trim() || '';
+    const { error } = await supabase.from('mentor_eslesmeleri').insert({ mentor_id: id, kullanici_id: s.user.id, mesaj });
+    if (error) { console.error(error.message); showToast('⚠️ Talep gönderilemedi!'); return; }
+    window.mentorTalepKapat();
+    showToast('✅ Mentorluk talebi gönderildi!');
+  } catch (e) { showToast('⚠️ Talep gönderilemedi!'); }
+};
+
+// ---- YARISMA BASVURU TAKIP ----
+const BASVURU_DURUMLARI = { 'taslak': 'Taslak', 'basvuruldu': 'Başvuruldu', 'on-eleme': 'Ön Eleme', 'final': 'Final 🏆', 'elendi': 'Elendi' };
+async function basvuruYukle() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) return;
+    const { data, error } = await supabase.from('yarisma_basvurulari').select('*').eq('kullanici_id', s.user.id).order('tarih', { ascending: false });
+    if (error) throw error;
+    const konteyner = document.getElementById('basvuru-listesi');
+    if (!konteyner) return;
+    if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">Henüz başvuru kaydı yok — yarışma kayıtlarını buradan takip et! 📋</div>'; return; }
+    konteyner.innerHTML = data.map(b => `
+      <div class="basvuru-kart">
+        <div class="basvuru-kart-ust">
+          <h4>${b.yarisma_ad}</h4>
+          <span class="basvuru-durum bs-${b.durum}">${BASVURU_DURUMLARI[b.durum] || b.durum}</span>
+        </div>
+        <div class="basvuru-meta">${b.takim_ad ? 'Takım: ' + b.takim_ad + ' · ' : ''}${b.kategori || ''}${b.rapor_tarihi ? ' · Rapor: ' + b.rapor_tarihi : ''}</div>
+        ${b.sonuc ? `<div class="basvuru-sonuc">Sonuç: ${b.sonuc}</div>` : ''}
+        <div class="basvuru-kart-alt">
+          <select class="basvuru-durum-select" onchange="basvuruDurumGuncelle(${b.id}, this.value)">
+            ${Object.entries(BASVURU_DURUMLARI).map(([k, v]) => `<option value="${k}" ${k === b.durum ? 'selected' : ''}>${v}</option>`).join('')}
+          </select>
+          <button class="btn btn-ghost" onclick="basvuruSil(${b.id})">Sil</button>
+        </div>
+      </div>`).join('');
+  } catch (e) { console.error(e.message); }
+}
+window.basvuruYukle = basvuruYukle;
+window.basvuruYeniModal = function() { const m = document.getElementById('basvuru-yeni-modal'); if (m) m.classList.add('open'); };
+window.basvuruYeniModalKapat = function() { const m = document.getElementById('basvuru-yeni-modal'); if (m) m.classList.remove('open'); };
+window.basvuruKaydet = async function() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return; }
+    const yarisma_ad = document.getElementById('basvuru-yarisma')?.value?.trim();
+    if (!yarisma_ad) { showToast('⚠️ Yarışma adı gerekli!'); return; }
+    const { error } = await supabase.from('yarisma_basvurulari').insert({
+      kullanici_id: s.user.id, yarisma_ad,
+      kategori: document.getElementById('basvuru-kategori')?.value?.trim() || '',
+      takim_ad: document.getElementById('basvuru-takim')?.value?.trim() || '',
+      durum: 'taslak',
+      rapor_tarihi: document.getElementById('basvuru-rapor')?.value || null
+    });
+    if (error) { console.error(error.message); showToast('⚠️ Başvuru kaydedilemedi!'); return; }
+    window.basvuruYeniModalKapat();
+    basvuruYukle();
+    xpEkle('yarisma-kayit', 40);
+    showToast('✅ Başvuru kaydı eklendi!');
+  } catch (e) { showToast('⚠️ Başvuru kaydedilemedi!'); }
+};
+window.basvuruDurumGuncelle = async function(id, durum) {
+  try { await supabase.from('yarisma_basvurulari').update({ durum }).eq('id', id); } catch (e) {}
+};
+window.basvuruSil = async function(id) {
+  if (!confirm('Başvuru kaydını silmek istiyor musun?')) return;
+  try { await supabase.from('yarisma_basvurulari').delete().eq('id', id); basvuruYukle(); } catch (e) { showToast('⚠️ Silinemedi!'); }
+};
+
+// ---- HALK OYLAMASI ----
+window.oyVer = async function(yarisma, proje) {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Oy vermek için giriş yap!'); return; }
+    const { error } = await supabase.from('halk_oylari').insert({ kullanici_id: s.user.id, yarisma_ad: yarisma, proje_ad: proje });
+    if (error) { showToast('⚠️ Daha önce oy verdin!'); return; }
+    showToast('✅ Oy verildi! 🗳️');
+    oylarYukle(yarisma);
+  } catch (e) { showToast('⚠️ Oy verilemedi!'); }
+};
+async function oylarYukle(yarisma) {
+  try {
+    const { data } = await supabase.from('halk_oylari').select('proje_ad').eq('yarisma_ad', yarisma);
+    const sayaclar = {};
+    (data || []).forEach(o => { sayaclar[o.proje_ad] = (sayaclar[o.proje_ad] || 0) + 1; });
+    const konteyner = document.getElementById('oy-sonuclari');
+    if (konteyner && Object.keys(sayaclar).length) {
+      const sirali = Object.entries(sayaclar).sort((a, b) => b[1] - a[1]);
+      konteyner.innerHTML = '<h4>🗳️ Halkın Seçimi — Canlı Sonuçlar</h4>' + sirali.map(([p, n]) => `
+        <div class="oy-satir"><span>${p}</span><div class="oy-bar"><div style="width:${Math.round(n / sirali[0][1] * 100)}%"></div></div><b>${n}</b></div>`).join('');
+    }
+  } catch (e) {}
+}
+
+// ---- SERTIFIKALAR ----
+async function sertifikaYukle() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) return;
+    const { data, error } = await supabase.from('sertifikalar').select('*').eq('kullanici_id', s.user.id).order('tarih', { ascending: false });
+    if (error) throw error;
+    const konteyner = document.getElementById('sertifika-listesi');
+    if (!konteyner) return;
+    if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">Henüz sertifika yok — derece aldığında otomatik oluşturulur! 🏅</div>'; return; }
+    konteyner.innerHTML = data.map(c => `
+      <div class="sertifika-kart">
+        <div class="sertifika-ikon">🏅</div>
+        <div>
+          <h4>${c.baslik}</h4>
+          <div class="sertifika-meta">${c.derece} · ${new Date(c.tarih).toLocaleDateString('tr-TR')}</div>
+          <a class="sertifika-link" href="dogrula.html?token=${c.token}" target="_blank">Doğrula →</a>
+        </div>
+      </div>`).join('');
+  } catch (e) { console.error(e.message); }
+}
+window.sertifikaYukle = sertifikaYukle;
+window.sertifikaOlustur = async function(baslik, derece) {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) return;
+    const token = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    await supabase.from('sertifikalar').insert({ kullanici_id: s.user.id, kullanici_ad: s.user.user_metadata?.full_name || s.user.email, baslik, derece, token });
+  } catch (e) {}
+};
+async function sertifikaDogrula(token) {
+  try {
+    const { data } = await supabase.from('sertifikalar').select('*').eq('token', token).single();
+    const alan = document.getElementById('sertifika-dogrulama');
+    if (!alan) return;
+    if (!data) { alan.innerHTML = '<div class="sertifika-sonuc hatali">❌ Sertifika bulunamadı. Token geçersiz.</div>'; return; }
+    alan.innerHTML = `
+      <div class="sertifika-sonuc gecerli">
+        <div class="sertifika-ikon">🏅</div>
+        <h3>${data.baslik}</h3>
+        <p>${data.kullanici_ad} — ${data.derece}</p>
+        <p class="sertifika-meta">Tarih: ${new Date(data.tarih).toLocaleDateString('tr-TR')} · Token: ${token}</p>
+        <div class="sertifika-muhur">✅ DOĞRULANDI</div>
+      </div>`;
+  } catch (e) { const alan = document.getElementById('sertifika-dogrulama'); if (alan) alan.innerHTML = '<div class="sertifika-sonuc hatali">❌ Doğrulama hatası.</div>'; }
+}
+window.sertifikaDogrula = sertifikaDogrula;
+
+// ---- ILAN BASVURULARI ----
+window.ilanBasvuruModal = function(ilanId, ilanAd) {
+  const m = document.getElementById('ilan-basvuru-modal');
+  if (!m) return;
+  document.getElementById('ib-iland-id').value = ilanId;
+  document.getElementById('ib-iland-ad').textContent = ilanAd;
+  document.getElementById('ib-mesaj').value = '';
+  m.classList.add('open');
+};
+window.ilanBasvuruKapat = function() { const m = document.getElementById('ilan-basvuru-modal'); if (m) m.classList.remove('open'); };
+window.ilanBasvuruGonder = async function() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) { showToast('⚠️ Önce giriş yapmalısın!'); return; }
+    const ilanId = parseInt(document.getElementById('ib-iland-id')?.value);
+    const mesaj = document.getElementById('ib-mesaj')?.value?.trim();
+    const { error } = await supabase.from('ilan_basvurulari').insert({ ilan_id: ilanId, kullanici_email: s.user.email, mesaj });
+    if (error) { console.error(error.message); showToast('⚠️ Başvuru gönderilemedi!'); return; }
+    window.ilanBasvuruKapat();
+    showToast('✅ İlana başvurdun! Sahibiyle iletişime geçilecek.');
+    xpEkle('ilan-basvuru', 15);
+  } catch (e) { showToast('⚠️ Başvuru gönderilemedi!'); }
+};
+async function ilanBasvurularim() {
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (!s) return;
+    const { data, error } = await supabase.from('ilan_basvurulari').select('*, ilanlar(ad, eposta)').eq('kullanici_email', s.user.email).order('tarih', { ascending: false });
+    if (error) throw error;
+    const konteyner = document.getElementById('ib-listesi');
+    if (!konteyner) return;
+    if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">Henüz ilan başvurun yok.</div>'; return; }
+    konteyner.innerHTML = data.map(b => `
+      <div class="ib-kart">
+        <h4>${b.ilanlar?.ad || 'İlan'}</h4>
+        <div class="ib-meta">${b.mesaj || ''} · ${new Date(b.tarih).toLocaleDateString('tr-TR')}</div>
+        <span class="basvuru-durum bs-${b.durum}">${b.durum}</span>
+      </div>`).join('');
+  } catch (e) {}
+}
+
+// ---- LIDERLIK ----
+async function liderlikYukle() {
+  try {
+    const { data, error } = await supabase.from('xp_toplam').select('kullanici_id, xp').order('xp', { ascending: false }).limit(50);
+    if (error) throw error;
+    const rozetler = (await rozetlerim());
+    const rozetKodlari = new Set(rozetler.map(r => r.kod));
+    const konteyner = document.getElementById('liderlik-listesi');
+    if (!konteyner) return;
+    if (!data.length) { konteyner.innerHTML = '<div class="forum-bos">XP henüz toplanmadı — aktivitelerden XP kazan ve zirveye çık! 🏆</div>'; return; }
+    const s = (await supabase.auth.getSession()).data.session;
+    const ben = s?.user?.id;
+    konteyner.innerHTML = data.map((k, i) => `
+      <div class="liderlik-satir ${k.kullanici_id === ben ? 'ben' : ''}">
+        <div class="liderlik-sira">${i + 1}</div>
+        <div class="liderlik-kullanici">${i === 0 ? '👑 ' : ''}${k.kullanici_id === ben ? 'Sen' : '#' + k.kullanici_id.slice(0, 6)}</div>
+        <div class="liderlik-xp">${k.xp} XP · Seviye ${seviyeHesapla(k.xp)}</div>
+      </div>`).join('');
+  } catch (e) { console.error(e.message); }
+}
+window.liderlikYukle = liderlikYukle;
+async function rozetlerimGoster() {
+  try {
+    const konteyner = document.getElementById('rozetlerim-listesi');
+    if (!konteyner) return;
+    const rozetler = (await rozetlerim()).map(r => r.kod);
+    const tanimlar = {
+      'profil-tam': '👤 Profilini Tamamla', 'ilk-kayit': '📝 İlk Yarışma Kaydı', 'ilk-ekip': '🤝 İlk Ekip',
+      'forumcu': '💬 Forum Yazarı', 'proje-sahibi': '🚀 Proje Sahibi', 'mentor': '🎓 Mentor',
+      'seri-7': '🔥 7 Gün Seri', 'degisken': '⚡ Aktif Üye'
+    };
+    konteyner.innerHTML = Object.keys(tanimlar).map(k => `
+      <div class="rozet-kart ${rozetler.includes(k) ? '' : 'kilitli'}">
+        <div class="rozet-ikon">${tanimlar[k].split(' ')[0]}</div>
+        <div class="rozet-ad">${tanimlar[k].split(' ').slice(1).join(' ')}</div>
+      </div>`).join('');
+  } catch (e) {}
+}
+window.rozetlerimGoster = rozetlerimGoster;
+
+// ---- ANALITIK (panel) ----
+async function analitikYukle() {
+  try {
+    const out = {};
+    const say = async (tablo) => { try { const { count } = await supabase.from(tablo).select('id', { count: 'exact', head: true }); return count || 0; } catch (e) { return 0; } };
+    out.profil = await say('profiller');
+    out.ilan = await say('ilanlar');
+    out.etkinlik = await say('etkinlikler');
+    out.forum = await say('forum_konulari');
+    out.proje = await say('projeler');
+    out.mentor = await say('mentorlar');
+    try { const { count } = await supabase.from('profiller').select('universite', { count: 'exact', head: true }); } catch (e) {}
+    const alan = document.getElementById('analitik-panel');
+    if (!alan) return;
+    alan.innerHTML = `
+      <div class="analitik-grid">
+        <div class="analitik-kart"><b>${out.profil}</b><span>Üye Profili</span></div>
+        <div class="analitik-kart"><b>${out.ilan}</b><span>İlan</span></div>
+        <div class="analitik-kart"><b>${out.etkinlik}</b><span>Etkinlik</span></div>
+        <div class="analitik-kart"><b>${out.forum}</b><span>Forum Konusu</span></div>
+        <div class="analitik-kart"><b>${out.proje}</b><span>Proje</span></div>
+        <div class="analitik-kart"><b>${out.mentor}</b><span>Mentor</span></div>
+      </div>`;
+  } catch (e) {}
+}
+window.analitikYukle = analitikYukle;
+
+// ---- TAKVIM ICS DISA AKTARIM ----
+window.takvimExportICS = function() {
+  try {
+    const SRC = window._dynamicEvents || (typeof EVENTS !== 'undefined' ? EVENTS : {});
+    const events = [];
+    Object.entries(SRC).forEach(([key, list]) => {
+      const [y, m, d] = key.split('-').map(Number);
+      (list || []).forEach(e => {
+        events.push({
+          baslik: e.title || 'Etkinlik',
+          detay: e.detail || '',
+          tarih: new Date(y, m - 1, d, 10, 0)
+        });
+      });
+    });
+    if (!events.length) { showToast('⚠️ Dışa aktarılacak etkinlik yok!'); return; }
+    let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Quantro//Takvim//TR\n';
+    events.forEach(e => {
+      const fmt = (dt) => dt.getFullYear() + String(dt.getMonth() + 1).padStart(2, '0') + String(dt.getDate()).padStart(2, '0') + 'T' + String(dt.getHours()).padStart(2, '0') + String(dt.getMinutes()).padStart(2, '0') + '00';
+      const uid = 'qt-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+      ics += 'BEGIN:VEVENT\nUID:' + uid + '\nDTSTART;TZID=Europe/Istanbul:' + fmt(e.tarih) + '\nDTEND;TZID=Europe/Istanbul:' + fmt(new Date(e.tarih.getTime() + 3600000)) + '\nSUMMARY:' + e.baslik.replace(/\n/g, ' ').replace(/[;,]/g, '\\$&') + '\nDESCRIPTION:' + (e.detay || '').replace(/\n/g, ' ').replace(/[;,]/g, '\\$&') + '\nEND:VEVENT\n';
+    });
+    ics += 'END:VCALENDAR';
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'quantro-takvim.ics';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+    showToast('✅ Takvim dışa aktarıldı (' + events.length + ' etkinlik)');
+  } catch (e) { showToast('⚠️ Dışa aktarılamadı!'); }
+};
+
 async function initApp() {
   if (!initSupabase()) return;
   await initAuth();
@@ -432,6 +1042,7 @@ async function initApp() {
   if (typeof overrideIlanFunctions === 'function') overrideIlanFunctions();
   // Sayfaya ozel init fonksiyonu varsa cagir
   if (typeof initPage === 'function') await initPage();
+  await initVizyon();
   console.log('✅ Quantro hazir!');
 }
 
@@ -772,6 +1383,10 @@ else { initApp(); }
         proje: ilanAdi
       });
       if (error) { console.error(error.message); showToast('⚠️ Başvuru gönderilemedi!'); return; }
+      const ilanId = parseInt(btn.closest('.ilan-card')?.dataset?.id) || null;
+      if (ilanId) {
+        try { await supabase.from('ilan_basvurulari').insert({ ilan_id: ilanId, kullanici_email: email }); xpEkle('ilan-basvuru', 15); } catch (e) {}
+      }
       btn.textContent = '✓ Başvuruldu';
       btn.disabled = true;
       btn.style.background = 'rgba(16,185,129,0.2)';
@@ -1386,8 +2001,9 @@ else { initApp(); }
         const sehirD= (card.dataset.sehir || '').toLowerCase();
         const skillsText = card.querySelector('.profil-skills')?.textContent.toLowerCase() || '';
         const bioText    = card.querySelector('.profil-bio')?.textContent.toLowerCase()    || '';
+        const ariyorText = (card.dataset.ariyorum || '').toLowerCase();
 
-        const matchQ     = !q     || name.includes(q) || skillsText.includes(q) || bioText.includes(q) || sehirD.includes(q);
+        const matchQ     = !q     || name.includes(q) || skillsText.includes(q) || bioText.includes(q) || sehirD.includes(q) || ariyorText.includes(q);
         const matchAlan  = !alan  || alanD.includes(alan);
         const matchSehir = !sehir || sehirD.includes(sehir);
 
@@ -1645,6 +2261,7 @@ else { initApp(); }
         if (saatEl && card.dataset.saat) saatEl.value = card.dataset.saat;
         const alanEl = document.getElementById('pf-alan');
         if (alanEl && card.dataset.alan) alanEl.value = card.dataset.alan;
+        if (card.dataset.ariyorum) document.getElementById('pf-ariyorum').value = card.dataset.ariyorum;
         // Eski kartı kaydet, kaydet butonunu "Güncelle" moduna al
         document.getElementById('profil-form-overlay').dataset.editCard = '';
         const submitBtn = document.querySelector('#profil-form-overlay .btn-primary');
