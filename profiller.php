@@ -8,10 +8,14 @@
         <p>Takımına katılacak yetenekleri keşfet veya kendi profilini oluştur</p>
       </div>
 
-      <div class="profil-add-btn-wrap reveal">
+      <div class="profil-add-btn-wrap reveal" style="display:flex;gap:.7rem;justify-content:center;">
         <button class="btn btn-primary" onclick="openProfilForm()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
           Profilimi Ekle
+        </button>
+        <button class="btn btn-ghost" onclick="openProfilForm()" id="profil-duzenle-btn" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Profili Düzenle
         </button>
       </div>
 
@@ -129,10 +133,19 @@
 
 <?php include __DIR__ . "/templates/shared/footer.php"; ?>
 <script>
-// Profiller page - load profiles and override form handlers
 initPage = async function() {
   if (typeof loadProfiller === "function") await loadProfiller();
   if (typeof overrideProfilFunctions === "function") overrideProfilFunctions();
+  try {
+    const s = (await supabase.auth.getSession()).data.session;
+    if (s) {
+      const { data } = await supabase.from('profiller').select('id').eq('user_id', s.user.id).limit(1);
+      if (data && data.length) {
+        document.getElementById('profil-duzenle-btn').style.display = '';
+        document.querySelector('.profil-add-btn-wrap .btn-primary').style.display = 'none';
+      }
+    }
+  } catch (e) {}
 };
 </script>
 <?php include __DIR__ . "/templates/shared/shared-js.php"; ?>

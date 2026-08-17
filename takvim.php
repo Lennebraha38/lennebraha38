@@ -73,7 +73,7 @@
         <div class="cal-3d-widget" id="cal-widget">
           <div class="cal-head">
             <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
-            <h3 id="cal-title">Mayıs 2026</h3>
+            <h3 id="cal-title"><?php $months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık']; echo $months[date('n')-1].' '.date('Y'); ?></h3>
             <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
           </div>
           <div class="cal-days-head">

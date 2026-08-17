@@ -4373,7 +4373,7 @@ function createProfilCardElement(p) {
   const alanlar = [p.isim, p.bio, p.yetenekler, p.sehir, p.universite, p.iletisim, p.alan, p.saat];
   const tamamlik = Math.round(alanlar.filter(Boolean).length / alanlar.length * 100);
   card.innerHTML = (p.avatar_url
-    ? '<div class="profil-avatar"><img src="'+p.avatar_url+'" alt="'+fullName+'"></div>'
+      ? '<div class="profil-avatar"><img src="'+p.avatar_url+'" alt="'+fullName+'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;display:block;"></div>'
     : '<div class="profil-avatar" style="background:'+color+';">'+initials+'</div>')+
     '<div class="profil-info"><div class="profil-info-name">'+fullName+'</div><div class="profil-info-role">'+(p.universite||'')+'</div></div>'+
     '<div class="profil-available"><span></span>'+(p.musaitlik||'Müsait')+'</div>'+
@@ -5798,8 +5798,8 @@ else { initApp(); }
       ],
     };
 
-    let calYear   = 2026;
-    let calMonth  = 4; // 0-indexed → Mayıs
+let calYear   = new Date().getFullYear();
+let calMonth  = new Date().getMonth();
     let selectedDay = null; // { y, m, d }
 
     function getEventKey(y, m, d) { return `${y}-${m+1}-${d}`; }

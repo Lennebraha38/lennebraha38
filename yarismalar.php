@@ -175,6 +175,7 @@
       <div id="oy-sonuclari" class="reveal" style="max-width:520px;margin:0 auto;"></div>
     </div>
   </section>
+  <div id="km-overlay">
     <div id="km-box">
       <div id="km-header">
         <div id="km-header-left">
