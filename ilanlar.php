@@ -54,6 +54,22 @@
     </div>
   </section>
 
+  <section id="ilan-basvuru-alan" style="padding:2rem 0;">
+    <div class="container">
+      <div class="page-form-area" id="ilan-basvuru-form" style="max-width:560px;margin:0 auto;">
+        <h3>📮 İlana Başvur</h3>
+        <p class="pfa-sub">İlana başvurunu gönder.</p>
+        <input type="hidden" id="ib-iland-id">
+        <div class="dm-alici">İlan: <b id="ib-iland-ad">—</b></div>
+        <div class="form-group">
+          <label class="form-label">Neden sen? <span style="color:var(--text-dim);font-weight:400;">(opsiyonel)</span></label>
+          <textarea class="form-control" id="ib-mesaj" rows="4" placeholder="Becerilerini ve deneyimini kısaca anlat..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="ilanBasvuruGonder()">Başvur</button>
+      </div>
+    </div>
+  </section>
+
   <div class="ilan-form-overlay" id="ilan-form-overlay" onclick="closeIlanForm(event)">
     <div class="ilan-form-modal">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.6rem;">

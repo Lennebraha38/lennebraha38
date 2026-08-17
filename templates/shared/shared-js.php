@@ -596,8 +596,7 @@ window.forumEtiketSec = function(el, etiket) {
   el.classList.add('active');
   forumYukle(etiket);
 };
-window.forumYeniKonuModal = function() { const m = document.getElementById('forum-yeni-modal'); if (m) m.classList.add('open'); };
-window.forumYeniModalKapat = function() { const m = document.getElementById('forum-yeni-modal'); if (m) m.classList.remove('open'); };
+window.toggleForumForm = function() { const f = document.getElementById('forum-form-alani'); if (f) f.classList.toggle('open'); };
 window.forumKonuEkle = async function() {
   try {
     const s = (await supabase.auth.getSession()).data.session;
@@ -608,7 +607,9 @@ window.forumKonuEkle = async function() {
     if (!baslik) { showToast('⚠️ Başlık gerekli!'); return; }
     const { error } = await supabase.from('forum_konulari').insert({ baslik, icerik, kullanici_id: s.user.id, etiket });
     if (error) { console.error(error.message); showToast('⚠️ Konu açılamadı!'); return; }
-    window.forumYeniModalKapat();
+    document.getElementById('forum-form-alani')?.classList.remove('open');
+    document.getElementById('forum-baslik').value = '';
+    document.getElementById('forum-icerik').value = '';
     forumYukle(etiket);
     showToast('✅ Konu yayınlandı!');
     xpEkle('forum-konu', 10);
@@ -691,8 +692,7 @@ async function projeYukle() {
   } catch (e) { console.error(e.message); }
 }
 window.projeYukle = projeYukle;
-window.projeYeniModal = function() { const m = document.getElementById('proje-yeni-modal'); if (m) m.classList.add('open'); };
-window.projeYeniModalKapat = function() { const m = document.getElementById('proje-yeni-modal'); if (m) m.classList.remove('open'); };
+window.toggleProjeForm = function() { const f = document.getElementById('proje-form-alani'); if (f) f.classList.toggle('open'); };
 window.projeKaydet = async function() {
   try {
     const s = (await supabase.auth.getSession()).data.session;
@@ -707,7 +707,11 @@ window.projeKaydet = async function() {
       asama: 'fikir'
     });
     if (error) { console.error(error.message); showToast('⚠️ Proje kaydedilemedi!'); return; }
-    window.projeYeniModalKapat();
+    document.getElementById('proje-form-alani')?.classList.remove('open');
+    document.getElementById('proje-ad').value = '';
+    document.getElementById('proje-aciklama').value = '';
+    document.getElementById('proje-etiketler').value = '';
+    document.getElementById('proje-demo').value = '';
     projeYukle();
     xpEkle('proje-ekle', 20);
     rozetVer('proje-sahibi');
@@ -754,8 +758,7 @@ async function mentorYukle() {
   } catch (e) { console.error(e.message); }
 }
 window.mentorYukle = mentorYukle;
-window.mentorYeniModal = function() { const m = document.getElementById('mentor-yeni-modal'); if (m) m.classList.add('open'); };
-window.mentorYeniModalKapat = function() { const m = document.getElementById('mentor-yeni-modal'); if (m) m.classList.remove('open'); };
+window.toggleMentorForm = function() { const f = document.getElementById('mentor-form-alani'); if (f) f.classList.toggle('open'); };
 window.mentorKaydet = async function() {
   try {
     const s = (await supabase.auth.getSession()).data.session;
@@ -772,7 +775,8 @@ window.mentorKaydet = async function() {
       onayli: false
     });
     if (error) { console.error(error.message); showToast('⚠️ Mentor kaydedilemedi!'); return; }
-    window.mentorYeniModalKapat();
+    document.getElementById('mentor-form-alani')?.classList.remove('open');
+    ['mentor-ad','mentor-unvan','mentor-alanlar','mentor-deneyim','mentor-musait','mentor-tanitim'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     mentorYukle();
     xpEkle('mentor-ol', 25);
     rozetVer('mentor');
@@ -780,14 +784,15 @@ window.mentorKaydet = async function() {
   } catch (e) { showToast('⚠️ Mentor kaydedilemedi!'); }
 };
 window.mentorTalebiModal = function(id, ad) {
-  const m = document.getElementById('mentor-talep-modal');
-  if (!m) return;
+  const f = document.getElementById('mentor-talep-form');
+  if (!f) return;
   document.getElementById('mentor-talep-id').value = id;
   document.getElementById('mentor-talep-ad').textContent = ad;
   document.getElementById('mentor-talep-mesaj').value = '';
-  m.classList.add('open');
+  f.classList.add('open');
+  f.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
-window.mentorTalepKapat = function() { const m = document.getElementById('mentor-talep-modal'); if (m) m.classList.remove('open'); };
+window.mentorTalepKapat = function() { const f = document.getElementById('mentor-talep-form'); if (f) f.classList.remove('open'); };
 window.mentorTalepGonder = async function() {
   try {
     const s = (await supabase.auth.getSession()).data.session;
@@ -796,7 +801,7 @@ window.mentorTalepGonder = async function() {
     const mesaj = document.getElementById('mentor-talep-mesaj')?.value?.trim() || '';
     const { error } = await supabase.from('mentor_eslesmeleri').insert({ mentor_id: id, kullanici_id: s.user.id, mesaj });
     if (error) { console.error(error.message); showToast('⚠️ Talep gönderilemedi!'); return; }
-    window.mentorTalepKapat();
+    mentorTalepKapat();
     showToast('✅ Mentorluk talebi gönderildi!');
   } catch (e) { showToast('⚠️ Talep gönderilemedi!'); }
 };
@@ -830,8 +835,7 @@ async function basvuruYukle() {
   } catch (e) { console.error(e.message); }
 }
 window.basvuruYukle = basvuruYukle;
-window.basvuruYeniModal = function() { const m = document.getElementById('basvuru-yeni-modal'); if (m) m.classList.add('open'); };
-window.basvuruYeniModalKapat = function() { const m = document.getElementById('basvuru-yeni-modal'); if (m) m.classList.remove('open'); };
+window.toggleBasvuruForm = function() { const f = document.getElementById('basvuru-form-alani'); if (f) f.classList.toggle('open'); };
 window.basvuruKaydet = async function() {
   try {
     const s = (await supabase.auth.getSession()).data.session;
@@ -846,7 +850,11 @@ window.basvuruKaydet = async function() {
       rapor_tarihi: document.getElementById('basvuru-rapor')?.value || null
     });
     if (error) { console.error(error.message); showToast('⚠️ Başvuru kaydedilemedi!'); return; }
-    window.basvuruYeniModalKapat();
+    document.getElementById('basvuru-form-alani')?.classList.remove('open');
+    document.getElementById('basvuru-yarisma').value = '';
+    document.getElementById('basvuru-kategori').value = '';
+    document.getElementById('basvuru-takim').value = '';
+    document.getElementById('basvuru-rapor').value = '';
     basvuruYukle();
     xpEkle('yarisma-kayit', 40);
     showToast('✅ Başvuru kaydı eklendi!');
@@ -935,14 +943,15 @@ window.sertifikaDogrula = sertifikaDogrula;
 
 // ---- ILAN BASVURULARI ----
 window.ilanBasvuruModal = function(ilanId, ilanAd) {
-  const m = document.getElementById('ilan-basvuru-modal');
-  if (!m) return;
+  const f = document.getElementById('ilan-basvuru-form');
+  if (!f) return;
   document.getElementById('ib-iland-id').value = ilanId;
   document.getElementById('ib-iland-ad').textContent = ilanAd;
   document.getElementById('ib-mesaj').value = '';
-  m.classList.add('open');
+  f.classList.add('open');
+  f.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
-window.ilanBasvuruKapat = function() { const m = document.getElementById('ilan-basvuru-modal'); if (m) m.classList.remove('open'); };
+window.ilanBasvuruKapat = function() { const f = document.getElementById('ilan-basvuru-form'); if (f) f.classList.remove('open'); };
 window.ilanBasvuruGonder = async function() {
   try {
     const s = (await supabase.auth.getSession()).data.session;
@@ -951,7 +960,8 @@ window.ilanBasvuruGonder = async function() {
     const mesaj = document.getElementById('ib-mesaj')?.value?.trim();
     const { error } = await supabase.from('ilan_basvurulari').insert({ ilan_id: ilanId, kullanici_email: s.user.email, mesaj });
     if (error) { console.error(error.message); showToast('⚠️ Başvuru gönderilemedi!'); return; }
-    window.ilanBasvuruKapat();
+    ilanBasvuruKapat();
+    document.getElementById('ib-mesaj').value = '';
     showToast('✅ İlana başvurdun! Sahibiyle iletişime geçilecek.');
     xpEkle('ilan-basvuru', 15);
   } catch (e) { showToast('⚠️ Başvuru gönderilemedi!'); }

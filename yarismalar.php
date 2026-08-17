@@ -121,10 +121,34 @@
       </div>
 
       <div class="reveal" style="display:flex;justify-content:flex-end;margin-bottom:1.2rem;">
-        <button class="btn btn-primary" onclick="basvuruYeniModal()">
+        <button class="btn btn-primary" onclick="toggleBasvuruForm()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
           Başvuru Ekle
         </button>
+      </div>
+
+      <div class="page-form-area reveal" id="basvuru-form-alani">
+        <h3>📋 Yarışma Başvuru Kaydı</h3>
+        <p class="pfa-sub">Başvurunu kaydet, tarihleri kaçırma.</p>
+        <div class="form-group">
+          <label class="form-label">Yarışma Adı</label>
+          <input type="text" class="form-control" id="basvuru-yarisma" placeholder="Örn: TEKNOFEST 2026">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Kategori</label>
+            <input type="text" class="form-control" id="basvuru-kategori" placeholder="Örn: İnsansız Hava Aracı">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Takım Adı</label>
+            <input type="text" class="form-control" id="basvuru-takim" placeholder="Örn: KartalTakımı">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rapor Tarihi</label>
+          <input type="date" class="form-control" id="basvuru-rapor">
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="basvuruKaydet()">Kaydet</button>
       </div>
 
       <div id="basvuru-listesi" class="reveal"></div>

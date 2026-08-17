@@ -9,10 +9,32 @@
       </div>
 
       <div class="reveal" style="display:flex;justify-content:flex-end;margin-bottom:1.2rem;">
-        <button class="btn btn-primary" onclick="projeYeniModal()">
+        <button class="btn btn-primary" onclick="toggleProjeForm()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
           Yeni Proje
         </button>
+      </div>
+
+      <div class="page-form-area reveal" id="proje-form-alani">
+        <h3>🚀 Yeni Proje</h3>
+        <p class="pfa-sub">Fikrini projeye dönüştür, ilk adımı at.</p>
+        <div class="form-group">
+          <label class="form-label">Proje Adı</label>
+          <input type="text" class="form-control" id="proje-ad" placeholder="Örn: Yapay Zeka Destekli Trafik Analizi">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Etiketler <span style="color:var(--text-dim);font-weight:400;">(virgülle ayır)</span></label>
+          <input type="text" class="form-control" id="proje-etiketler" placeholder="AI, Görüntü İşleme, Python">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Demo URL <span style="color:var(--text-dim);font-weight:400;">(opsiyonel)</span></label>
+          <input type="text" class="form-control" id="proje-demo" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Açıklama</label>
+          <textarea class="form-control" id="proje-aciklama" rows="3" placeholder="Projenizi ve hedefinizi anlatın..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="projeKaydet()">Projeyi Ekle</button>
       </div>
 
       <div id="proje-listesi" class="reveal"></div>
