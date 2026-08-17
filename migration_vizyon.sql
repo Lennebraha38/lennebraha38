@@ -220,16 +220,20 @@ CREATE TABLE IF NOT EXISTS ilan_basvurulari (
 );
 ALTER TABLE ilan_basvurulari ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "ib_select" ON ilan_basvurulari;
-CREATE POLICY "ib_select" ON ilan_basvurulari FOR SELECT USING (auth.role() = 'authenticated' AND (kullanici_email = auth.email() OR ilan_id IN (SELECT id FROM ilanlar WHERE eposta = auth.email())));
+CREATE POLICY "ib_select" ON ilan_basvurulari FOR SELECT USING (auth.role() = 'authenticated' AND (kullanici_email = auth.email() OR ilan_id IN (SELECT id FROM ilanlar WHERE iletisim_email = auth.email())));
 DROP POLICY IF EXISTS "ib_insert" ON ilan_basvurulari;
 CREATE POLICY "ib_insert" ON ilan_basvurulari FOR INSERT WITH CHECK (auth.role() = 'authenticated' AND kullanici_email = auth.email());
 DROP POLICY IF EXISTS "ib_update" ON ilan_basvurulari;
-CREATE POLICY "ib_update" ON ilan_basvurulari FOR UPDATE USING (ilan_id IN (SELECT id FROM ilanlar WHERE eposta = auth.email()));
+CREATE POLICY "ib_update" ON ilan_basvurulari FOR UPDATE USING (ilan_id IN (SELECT id FROM ilanlar WHERE iletisim_email = auth.email()));
 
 -- ============ 10. PROFILLER 'ariyorum' + tamamlik ============
+ALTER TABLE profiller ADD COLUMN IF NOT EXISTS eposta VARCHAR(120) DEFAULT '';
 ALTER TABLE profiller ADD COLUMN IF NOT EXISTS ariyorum VARCHAR(200) DEFAULT '';
 ALTER TABLE profiller ADD COLUMN IF NOT EXISTS github VARCHAR(160) DEFAULT '';
 ALTER TABLE profiller ADD COLUMN IF NOT EXISTS linkedin VARCHAR(160) DEFAULT '';
+
+-- ============ 10b. ILANLAR email kolonu garanti ============
+ALTER TABLE ilanlar ADD COLUMN IF NOT EXISTS iletisim_email VARCHAR(120) DEFAULT '';
 
 -- ============ 11. GOREVLER duzeltme kolonlari ============
 ALTER TABLE gorevler ADD COLUMN IF NOT EXISTS durum VARCHAR(20) DEFAULT 'acik';

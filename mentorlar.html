@@ -4964,7 +4964,7 @@ async function ilanBasvurularim() {
   try {
     const s = (await supabase.auth.getSession()).data.session;
     if (!s) return;
-    const { data, error } = await supabase.from('ilan_basvurulari').select('*, ilanlar(ad, eposta)').eq('kullanici_email', s.user.email).order('tarih', { ascending: false });
+    const { data, error } = await supabase.from('ilan_basvurulari').select('*, ilanlar(ad, iletisim_email)').eq('kullanici_email', s.user.email).order('tarih', { ascending: false });
     if (error) throw error;
     const konteyner = document.getElementById('ib-listesi');
     if (!konteyner) return;
