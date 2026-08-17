@@ -1692,8 +1692,8 @@
     }
     .profil-meta span { display: flex; align-items: center; gap: 0.3rem; }
 
-    .profil-actions { display: flex; gap: 0.6rem; margin-top: 0.25rem; }
-    .profil-actions .btn { flex: 1; font-size: 0.78rem; padding: 0.5rem 0.8rem; }
+    .profil-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; justify-content: center; flex-wrap: wrap; }
+    .profil-actions .btn { flex: 1 1 0; min-width: 0; font-size: 0.78rem; padding: 0.5rem 0.6rem; text-align: center; }
 
     .profil-card[data-hidden="true"] { display: none; }
 

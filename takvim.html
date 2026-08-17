@@ -1692,8 +1692,8 @@
     }
     .profil-meta span { display: flex; align-items: center; gap: 0.3rem; }
 
-    .profil-actions { display: flex; gap: 0.6rem; margin-top: 0.25rem; }
-    .profil-actions .btn { flex: 1; font-size: 0.78rem; padding: 0.5rem 0.8rem; }
+    .profil-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; justify-content: center; flex-wrap: wrap; }
+    .profil-actions .btn { flex: 1 1 0; min-width: 0; font-size: 0.78rem; padding: 0.5rem 0.6rem; text-align: center; }
 
     .profil-card[data-hidden="true"] { display: none; }
 
@@ -4214,17 +4214,20 @@ async function loadProfiller() {
   if (!data.length) { if (emptyEl) emptyEl.style.display = ''; return; }
   if (emptyEl) emptyEl.style.display = 'none';
   let aktiviteMap = {};
+  let benEposta = '';
   try {
+    const s = (await supabase.auth.getSession()).data.session;
+    benEposta = s?.user?.email || '';
     const userIds = data.map(p => p.user_id).filter(Boolean);
     if (userIds.length) {
       const { data: kpuan } = await supabase.from('kpuanlar').select('kullanici_id, tarih').in('kullanici_id', userIds).order('tarih', { ascending: false });
       if (kpuan) kpuan.forEach(k => { if (!aktiviteMap[k.kullanici_id]) aktiviteMap[k.kullanici_id] = k.tarih; });
     }
   } catch (e) {}
-  data.forEach(p => { grid.appendChild(createProfilCardElement(p, aktiviteMap[p.user_id])); });
+  data.forEach(p => { grid.appendChild(createProfilCardElement(p, aktiviteMap[p.user_id], benEposta)); });
 }
 
-function createProfilCardElement(p, sonAktif) {
+function createProfilCardElement(p, sonAktif, benEposta) {
   const fullName = p.isim || '';
   const initials = fullName.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   const color = p.avatar_url ? 'transparent' : 'linear-gradient(135deg,#3b82f6,#06b6d4)';
@@ -4256,7 +4259,7 @@ function createProfilCardElement(p, sonAktif) {
     '<div class="profil-meta"><span>📍 '+(p.sehir||'—')+'</span><span>⏰ '+(p.saat||'—')+'</span></div>'+
     '<div class="profil-tamamlama" title="Profil tamamlama"><div class="pt-bar"><div style="width:'+tamamlik+'%"></div></div><span>%'+tamamlik+'</span></div>'+
     '<div class="profil-actions"><button class="btn btn-primary btn-sm" onclick="openProfilDetail(this.closest(\'.profil-card\'))" style="flex:1.4">Profili Gör</button>'+
-    (p.eposta ? '<button class="btn btn-ghost btn-sm" onclick="openDmModal(\''+p.eposta+'\', \''+fullName.replace(/'/g, '’')+'\')" title="Mesaj gönder">Mesaj</button>' : '')+
+    (p.eposta && p.eposta !== benEposta ? '<button class="btn btn-ghost btn-sm" onclick="openDmModal(\''+p.eposta+'\', \''+fullName.replace(/'/g, '\u2019')+'\')" title="Mesaj g\u00f6nder">Mesaj</button>' : '')+
     '<button class="btn btn-secondary btn-sm" onclick="editProfilCard(this)">Düzenle</button>'+
     '<button class="btn btn-ghost btn-sm" onclick="deleteProfilCard(this)" style="color:#f87171;border-color:rgba(239,68,68,0.2)">Sil</button></div>';
   return card;
