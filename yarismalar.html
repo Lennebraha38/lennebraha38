@@ -4967,7 +4967,6 @@ async function projeYukle() {
         <div class="proje-asama-cubuk">${PROJE_ASAMALARI.map((a, i) => `<div class="pa-${i <= asamaIdx ? 'dolu' : 'bos'}"></div>`).join('')}</div>
         <p class="proje-aciklama">${p.aciklama || ''}</p>
         <div class="proje-kart-alt">
-          ${p.demo_url ? `<a class="btn btn-ghost" target="_blank" href="${p.demo_url}">Demo</a>` : ''}
           <button class="btn btn-ghost" onclick="projeAsamaGuncelle(${p.id})">Aşama İlerlet</button>
           <button class="btn btn-danger-ghost" onclick="projeSil(${p.id})">Sil</button>
         </div>
@@ -4987,7 +4986,6 @@ window.projeKaydet = async function() {
       kullanici_id: s.user.id, ad,
       aciklama: document.getElementById('proje-aciklama')?.value?.trim() || '',
       etiketler: document.getElementById('proje-etiketler')?.value?.trim() || '',
-      demo_url: document.getElementById('proje-demo')?.value?.trim() || '',
       asama: 'fikir'
     });
     if (error) { console.error(error.message); showToast('⚠️ Proje kaydedilemedi!'); return; }
@@ -4995,7 +4993,6 @@ window.projeKaydet = async function() {
     document.getElementById('proje-ad').value = '';
     document.getElementById('proje-aciklama').value = '';
     document.getElementById('proje-etiketler').value = '';
-    document.getElementById('proje-demo').value = '';
     projeYukle();
     xpEkle('proje-ekle', 20);
     rozetVer('proje-sahibi');

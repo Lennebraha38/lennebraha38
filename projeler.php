@@ -27,10 +27,6 @@
           <input type="text" class="form-control" id="proje-etiketler" placeholder="AI, Görüntü İşleme, Python">
         </div>
         <div class="form-group">
-          <label class="form-label">Demo URL <span style="color:var(--text-dim);font-weight:400;">(opsiyonel)</span></label>
-          <input type="text" class="form-control" id="proje-demo" placeholder="https://...">
-        </div>
-        <div class="form-group">
           <label class="form-label">Açıklama</label>
           <textarea class="form-control" id="proje-aciklama" rows="3" placeholder="Projenizi ve hedefinizi anlatın..."></textarea>
         </div>
