@@ -4263,10 +4263,18 @@ async function loadProfiller() {
   const emptyEl = document.getElementById('profiller-empty-msg-initial');
   if (!data.length) { if (emptyEl) emptyEl.style.display = ''; return; }
   if (emptyEl) emptyEl.style.display = 'none';
-  data.forEach(p => { grid.appendChild(createProfilCardElement(p)); });
+  let aktiviteMap = {};
+  try {
+    const userIds = data.map(p => p.user_id).filter(Boolean);
+    if (userIds.length) {
+      const { data: kpuan } = await supabase.from('kpuanlar').select('kullanici_id, tarih').in('kullanici_id', userIds).order('tarih', { ascending: false });
+      if (kpuan) kpuan.forEach(k => { if (!aktiviteMap[k.kullanici_id]) aktiviteMap[k.kullanici_id] = k.tarih; });
+    }
+  } catch (e) {}
+  data.forEach(p => { grid.appendChild(createProfilCardElement(p, aktiviteMap[p.user_id])); });
 }
 
-function createProfilCardElement(p) {
+function createProfilCardElement(p, sonAktif) {
   const fullName = p.isim || '';
   const initials = fullName.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   const color = p.avatar_url ? 'transparent' : 'linear-gradient(135deg,#3b82f6,#06b6d4)';
@@ -4279,13 +4287,20 @@ function createProfilCardElement(p) {
   card.dataset.ariyorum = p.ariyorum||'';
   card.dataset.avatar = p.avatar_url||''; card.dataset.color = color; card.dataset.initials = initials; card.dataset.id = p.id;
   const ariyorRozet = p.ariyorum ? '<div class="profil-ariyor" title="Takımda arıyor"><span>🧲</span>'+(p.ariyorum.length > 80 ? p.ariyorum.slice(0,80)+'…' : p.ariyorum)+'</div>' : '';
+  let durum = 'Çevrimdışı', durumRenk = '#6b7280';
+  if (sonAktif) {
+    const fark = (Date.now() - new Date(sonAktif).getTime()) / 1000 / 3600;
+    if (fark < 1) { durum = 'Aktif'; durumRenk = '#10b981'; }
+    else if (fark < 24) { durum = 'Son 24 saat'; durumRenk = '#22c55e'; }
+    else if (fark < 168) { durum = 'Bu hafta'; durumRenk = '#eab308'; }
+  } else if (p.musaitlik) { durum = p.musaitlik; durumRenk = '#7c3aed'; }
   const alanlar = [p.isim, p.bio, p.yetenekler, p.sehir, p.universite, p.iletisim, p.alan, p.saat];
   const tamamlik = Math.round(alanlar.filter(Boolean).length / alanlar.length * 100);
   card.innerHTML = (p.avatar_url
       ? '<div class="profil-avatar"><img src="'+p.avatar_url+'" alt="'+fullName+'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;display:block;"></div>'
     : '<div class="profil-avatar" style="background:'+color+';">'+initials+'</div>')+
     '<div class="profil-info"><div class="profil-info-name">'+fullName+'</div><div class="profil-info-role">'+(p.universite||'')+'</div></div>'+
-    '<div class="profil-available"><span></span>'+(p.musaitlik||'Müsait')+'</div>'+
+    '<div class="profil-available" style="--dot-color:'+durumRenk+'"><span style="background:'+durumRenk+'"></span>'+durum+'</div>'+
     ariyorRozet+
     '<div class="profil-bio">'+(p.bio||'')+'</div><div class="profil-skills">'+skillTags+'</div>'+
     '<div class="profil-meta"><span>📍 '+(p.sehir||'—')+'</span><span>⏰ '+(p.saat||'—')+'</span></div>'+
@@ -4812,6 +4827,8 @@ window.projeSil = async function(id) {
 // ---- MENTORLAR ----
 async function mentorYukle() {
   try {
+    const s = (await supabase.auth.getSession()).data.session;
+    const benId = s?.user?.id;
     const { data, error } = await supabase.from('mentorlar').select('*').order('tarih', { ascending: false });
     if (error) throw error;
     const konteyner = document.getElementById('mentor-listesi');
@@ -4826,7 +4843,7 @@ async function mentorYukle() {
           <div class="mentor-alanlar">${(m.alanlar || '').split(',').map(a => `<span class="mentor-alan">${a.trim()}</span>`).join('')}</div>
           <p class="mentor-tanitim">${m.tanitim || ''}</p>
           <div class="mentor-kart-alt">
-            <button class="btn btn-primary" onclick="mentorTalebiModal(${m.id}, '${m.ad.replace(/'/g, "\\'")}')">Mentorluk İste</button>
+            ${m.kullanici_id !== benId ? `<button class="btn btn-primary" onclick="mentorTalebiModal(${m.id}, '${m.ad.replace(/'/g, "\\'")}')">Mentorluk İste</button>` : '<span style="font-size:.78rem;color:var(--text-dim);">Bu senin mentor profilin</span>'}
           </div>
         </div>
       </div>`).join('');
@@ -6464,7 +6481,10 @@ let calMonth  = new Date().getMonth();
       const alan     = card.dataset.alan || '';
       const ariyorum = card.dataset.ariyorum || '';
       const eposta   = card.dataset.eposta || '';
-      const alanLabel= {yazilim:'Yazılım',  'yapay-zeka':'Yapay Zeka', donanim:'Donanım / Elektronik', tasarim:'Tasarım', siber:'Siber Güvenlik', mekanik:'Mekanik'}[alan] || alan;
+      const alanLabel= {yazilim:'Yazılım',  'yapay-zeka':'Yapay Zeka', donanim:'Donanım / Elektronik', tasarım:'Tasarım', siber:'Siber Güvenlik', mekanik:'Mekanik'}[alan] || alan;
+      const durumBadge = card.querySelector('.profil-available span');
+      const durum = card.querySelector('.profil-available')?.textContent?.trim() || 'Çevrimdışı';
+      const durumRenk = durumBadge?.style?.background || '#6b7280';
 
       const skills = Array.from(card.querySelectorAll('.profil-skill')).map(s => s.textContent.trim());
       const skillHTML = skills.map(s => `<span class="pdm-skill">${escapeHtml(s)}</span>`).join('');
@@ -6486,7 +6506,7 @@ let calMonth  = new Date().getMonth();
                 <div class="pdm-name">${escapeHtml(name)}</div>
                 <div class="pdm-uni">${escapeHtml(uni)}</div>
               </div>
-              <div class="pdm-available-badge">Müsait</div>
+              <div class="pdm-available-badge" style="background:${durumRenk}22;color:${durumRenk};border:1px solid ${durumRenk}44">${durum}</div>
             </div>
             <div class="pdm-bio">${escapeHtml(bio) || '<span style="color:var(--text-dim);font-style:italic;">Biyografi eklenmemiş.</span>'}</div>
             ${ariyorum ? `<div class="profil-ariyor" style="margin-top:.7rem;"><span>🧲</span>${escapeHtml(ariyorum)}</div>` : ''}
